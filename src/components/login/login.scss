@@ -17,6 +17,7 @@
 }
 
 .confirmBtn,
+.cnclBtn,
 .enterRoomBtn {
   margin: 10px 0;
   padding: 12px 12px;
@@ -28,7 +29,14 @@
   border-radius: 7px;
 }
 
-.confirmBtn {
+.cnclBtn {
+  background: #cf4242;
+}
+
+.cnclBtn:hover {
+  background: #963232;
+}
+s .confirmBtn {
   max-width: 400px;
 }
 

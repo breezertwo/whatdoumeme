@@ -50,17 +50,17 @@ export const getRoundData = (): any => {
 export const getPlayers = (): any => {
   return [
     {
-      playerName: 'breezertwo',
+      username: 'breezertwo',
       hasCommitted: false,
       score: 0,
     },
     {
-      playerName: 'mrPotatoHead',
+      username: 'mrPotatoHead',
       hasCommitted: false,
       score: 0,
     },
     {
-      playerName: 'mrjimmedy',
+      username: 'mrjimmedy',
       hasCommitted: false,
       score: 0,
     },

@@ -15,7 +15,7 @@ export enum STATES {
 
 export class Game {
   private readonly _id: string;
-  private players: Player[] = [];
+  private _players: Player[] = [];
   private _STATE: STATES;
 
   constructor() {
@@ -31,13 +31,17 @@ export class Game {
     return this._id;
   }
 
+  get players(): Player[] {
+    return this._players;
+  }
+
   private getPlayerByName(playerName: string): Player[] {
-    return this.players.filter((player) => player.username === playerName);
+    return this._players.filter((player) => player.username === playerName);
   }
 
   public joinGame(playerName: string): Game {
     if (this.getPlayerByName(playerName).length === 0)
-      this.players.push({
+      this._players.push({
         username: playerName,
         score: 0,
         hasCommitted: false,
@@ -46,9 +50,9 @@ export class Game {
   }
 
   public leaveGame(playerName: string): Player[] {
-    this.players = this.players.filter(
+    this._players = this._players.filter(
       (player) => player.username !== playerName
     );
-    return this.players;
+    return this._players;
   }
 }

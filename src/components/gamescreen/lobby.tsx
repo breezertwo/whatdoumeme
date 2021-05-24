@@ -9,6 +9,13 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       width: '100%',
       maxWidth: 360,
+      alignSelf: 'center',
+    },
+    header: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignContent: 'center',
     },
     item: {
       backgroundColor: theme.palette.background.paper,
@@ -19,14 +26,20 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export interface LobbyProps {
   players: any[];
+  onLeaveClick: () => void;
 }
 
-const Lobby = ({ players }: LobbyProps): JSX.Element => {
+const Lobby = ({ players, onLeaveClick }: LobbyProps): JSX.Element => {
   const classes = useStyles();
 
   return (
     <div className={classes.root}>
-      <h1>Lobby:</h1>
+      <div className={classes.header}>
+        <h1>Lobby:</h1>
+        <div className="cnclBtn" onClick={onLeaveClick}>
+          Leave
+        </div>
+      </div>
       <List component="nav">
         {players.map((player, i) => (
           <ListItem key={i} className={classes.item}>

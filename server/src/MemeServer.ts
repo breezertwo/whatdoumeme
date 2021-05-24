@@ -5,7 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { createServer, Server as HttpServer } from 'http';
 import cors from 'cors';
 import User from './db/userSchema';
-import { Game } from './Game';
+import { Game, STATES } from './Game';
 
 export class MemeServer {
   private readonly GAME_RECIVE_EVENT: string = 'sendGame';
@@ -78,8 +78,33 @@ export class MemeServer {
           console.log(socket.rooms);
 
           socket.emit(this.GAME_RECIVE_EVENT, game);
+          if (game.state === STATES.WAITING)
+            socket.broadcast.to(game.id).emit('playerData', game.players);
         }
       }
+
+      socket.on('leaveGame', async (data, fn) => {
+        console.log(`[I] ${data.senderId} will leave`);
+
+        const userDb = await this.getUser(data.senderId);
+        if (userDb) {
+          const username = userDb.username;
+
+          const roomId = data.roomId;
+          const game = this.activeGames.get(roomId as string);
+
+          if (game) {
+            console.log(socket.rooms);
+            game.leaveGame(username);
+            socket.leave(game.id);
+            fn();
+            console.log(socket.rooms);
+
+            this.io.to(game.id).emit('playerData', game.players);
+          }
+        }
+      });
+
       socket.on('disconnect', function () {
         console.log(`[I] ${socket.id} disconnected`);
       });
@@ -88,15 +113,12 @@ export class MemeServer {
 
   private async getUser(username: string): Promise<any> {
     let doc = await User.findOne({ username }).exec();
-    console.log(doc);
-
     if (doc === null) {
       const newUser = new User({
         username,
       });
       doc = await newUser.save();
     }
-    console.log(doc);
     return doc;
   }
 

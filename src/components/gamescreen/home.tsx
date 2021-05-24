@@ -16,7 +16,9 @@ const Home = (): JSX.Element => {
   const [state, setState] = useState(STATES.STARTED);
   const { roomId } = useParams<any>();
 
-  const { roundData, playersData, serverState } = useConnection(roomId);
+  const { roundData, playersData, serverState, leaveGame } = useConnection(
+    roomId
+  );
 
   const onCardClicked = (id: number) => {
     console.log(id);
@@ -29,7 +31,7 @@ const Home = (): JSX.Element => {
   const getViewByState = (state: number): JSX.Element => {
     switch (state) {
       case STATES.WAITING:
-        return <Lobby players={playersData} />;
+        return <Lobby players={playersData} onLeaveClick={leaveGame} />;
       case STATES.STARTED:
         return <GameView roundData={roundData} onCardClicked={onCardClicked} />;
       default:
