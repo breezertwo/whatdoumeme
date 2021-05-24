@@ -30,7 +30,7 @@ const Lobby = ({ players }: LobbyProps): JSX.Element => {
       <List component="nav">
         {players.map((player, i) => (
           <ListItem key={i} className={classes.item}>
-            {player.playerName}
+            {player.username}
           </ListItem>
         ))}
       </List>

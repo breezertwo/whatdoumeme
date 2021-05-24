@@ -19,7 +19,7 @@ const JoinGame = (): JSX.Element => {
 
   return (
     <div className="loginContainer">
-      <Link to={'/create'} className="enterRoomBtn">
+      <Link to={`room/:create`} className="enterRoomBtn">
         Create game
       </Link>
       <input

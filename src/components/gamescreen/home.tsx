@@ -16,17 +16,15 @@ const Home = (): JSX.Element => {
   const [state, setState] = useState(STATES.STARTED);
   const { roomId } = useParams<any>();
 
-  const { roundData, playersData, sendSelectedCard } = useConnection(roomId);
-
-  useEffect(() => {
-    if (!Cookies.get('roomId')) {
-      Cookies.set('roomId', roomId);
-    }
-  }, []);
+  const { roundData, playersData, serverState } = useConnection(roomId);
 
   const onCardClicked = (id: number) => {
     console.log(id);
   };
+
+  useEffect(() => {
+    setState(serverState);
+  }, [serverState]);
 
   const getViewByState = (state: number): JSX.Element => {
     switch (state) {
@@ -35,7 +33,7 @@ const Home = (): JSX.Element => {
       case STATES.STARTED:
         return <GameView roundData={roundData} onCardClicked={onCardClicked} />;
       default:
-        break;
+        return <p>FAIL</p>;
     }
   };
   return getViewByState(state);
