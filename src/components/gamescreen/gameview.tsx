@@ -15,7 +15,7 @@ const useStyles = makeStyles({
 
 export interface GameViewProps {
   roundData: any;
-  onCardClicked: (cardId: number) => void;
+  onCardClicked: (cardId: string) => void;
 }
 
 const GameView = ({ roundData, onCardClicked }: GameViewProps): JSX.Element => {

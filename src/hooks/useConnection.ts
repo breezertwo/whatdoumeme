@@ -7,6 +7,7 @@ import { useHistory } from 'react-router-dom';
 
 const NEW_ROUND_EVENT = 'newRound';
 const LEAVE_GAME_EVENT = 'leaveGame';
+const START_GAME_EVENT = 'startGame';
 const GAME_RECIVE_EVENT = 'sendGame';
 const GET_PLAYER_EVENT = 'playerData';
 
@@ -17,11 +18,12 @@ export interface SocketConnection {
   roundData: any;
   playersData: any;
   serverState: number;
+  startGame: () => void;
   leaveGame: () => void;
 }
 
 const useConnection = (roomId: string): SocketConnection => {
-  const [roundData, setRoundData] = useState(getRoundData());
+  const [roundData, setRoundData] = useState({});
   const [playersData, setPlayersData] = useState([]);
   const [serverState, setServerState] = useState(0);
 
@@ -53,7 +55,8 @@ const useConnection = (roomId: string): SocketConnection => {
 
     socketRef.current.on(NEW_ROUND_EVENT, (data) => {
       console.log('NR' + data);
-      setRoundData([...data]);
+      setRoundData({ ...data });
+      setServerState(data.serverState);
     });
 
     socketRef.current.on(GET_PLAYER_EVENT, (data) => {
@@ -76,7 +79,13 @@ const useConnection = (roomId: string): SocketConnection => {
     );
   };
 
-  return { roundData, playersData, serverState, leaveGame };
+  const startGame = () => {
+    socketRef.current.emit(START_GAME_EVENT, {
+      roomId: Cookies.get('roomId'),
+    });
+  };
+
+  return { roundData, playersData, serverState, startGame, leaveGame };
 };
 
 export default useConnection;

@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useConnection from '../../hooks/useConnection';
@@ -13,14 +12,18 @@ enum STATES {
 }
 
 const Home = (): JSX.Element => {
-  const [state, setState] = useState(STATES.STARTED);
+  const [state, setState] = useState(STATES.WAITING);
   const { roomId } = useParams<any>();
 
-  const { roundData, playersData, serverState, leaveGame } = useConnection(
-    roomId
-  );
+  const {
+    roundData,
+    playersData,
+    serverState,
+    startGame,
+    leaveGame,
+  } = useConnection(roomId);
 
-  const onCardClicked = (id: number) => {
+  const onCardClicked = (id: string) => {
     console.log(id);
   };
 
@@ -28,17 +31,20 @@ const Home = (): JSX.Element => {
     setState(serverState);
   }, [serverState]);
 
-  const getViewByState = (state: number): JSX.Element => {
-    switch (state) {
-      case STATES.WAITING:
-        return <Lobby players={playersData} onLeaveClick={leaveGame} />;
-      case STATES.STARTED:
-        return <GameView roundData={roundData} onCardClicked={onCardClicked} />;
-      default:
-        return <p>FAIL</p>;
-    }
-  };
-  return getViewByState(state);
+  switch (state) {
+    case STATES.WAITING:
+      return (
+        <Lobby
+          players={playersData}
+          onStartClick={startGame}
+          onLeaveClick={leaveGame}
+        />
+      );
+    case STATES.STARTED:
+      return <GameView roundData={roundData} onCardClicked={onCardClicked} />;
+    default:
+      return <p>FAIL</p>;
+  }
 };
 
 export default Home;

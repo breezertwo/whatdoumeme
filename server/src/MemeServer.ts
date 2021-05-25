@@ -9,6 +9,8 @@ import { Game, STATES } from './Game';
 
 export class MemeServer {
   private readonly GAME_RECIVE_EVENT: string = 'sendGame';
+  private readonly NEW_ROUND_EVENT: string = 'newRound';
+
   public static readonly PORT: number = 3030;
   private _app: express.Application;
   private server: HttpServer;
@@ -65,7 +67,7 @@ export class MemeServer {
         const roomId = cookies.roomId || socket.handshake.query.roomId;
 
         if (roomId === ':create') {
-          game = new Game();
+          game = new Game(username);
           this.activeGames.set(game.id, game);
         } else if (roomId) {
           game = this.activeGames.get(roomId as string);
@@ -73,7 +75,7 @@ export class MemeServer {
 
         if (game) {
           console.log(socket.rooms);
-          game.joinGame(username);
+          game.joinGame(username, socket.id);
           socket.join(game.id);
           console.log(socket.rooms);
 
@@ -83,9 +85,7 @@ export class MemeServer {
         }
       }
 
-      socket.on('leaveGame', async (data, fn) => {
-        console.log(`[I] ${data.senderId} will leave`);
-
+      socket.on('leaveGame', async (data, callback) => {
         const userDb = await this.getUser(data.senderId);
         if (userDb) {
           const username = userDb.username;
@@ -94,14 +94,28 @@ export class MemeServer {
           const game = this.activeGames.get(roomId as string);
 
           if (game) {
-            console.log(socket.rooms);
             game.leaveGame(username);
             socket.leave(game.id);
-            fn();
-            console.log(socket.rooms);
+            callback();
+            console.log(`[I] ${data.senderId} left game ${data.roomId}`);
 
             this.io.to(game.id).emit('playerData', game.players);
           }
+        }
+      });
+
+      socket.on('startGame', async (data, callback) => {
+        //TODO: Not safe for changed data
+        const roomId = data.roomId;
+        const game = this.activeGames.get(roomId as string);
+        if (game) {
+          game.initGame();
+          for (const player of game.players) {
+            socket.broadcast
+              .to(player.socketId)
+              .emit(this.NEW_ROUND_EVENT, game.getNextRound(player.username));
+          }
+          console.log(`[I] ${data.roomId}: Game started`);
         }
       });
 

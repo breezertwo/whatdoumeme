@@ -16,6 +16,7 @@
   outline: none;
 }
 
+.grnBtn,
 .confirmBtn,
 .cnclBtn,
 .enterRoomBtn {
@@ -36,10 +37,12 @@
 .cnclBtn:hover {
   background: #963232;
 }
-s .confirmBtn {
+
+.confirmBtn {
   max-width: 400px;
 }
 
+.grnBtn:hover,
 .confirmBtn:hover {
   background: #156628;
 }

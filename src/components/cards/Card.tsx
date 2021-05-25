@@ -20,9 +20,9 @@ const useStyles = makeStyles<Theme, CardsProps>(() =>
 
 export interface CardsProps {
   text: string;
-  cardId: number;
+  cardId: string;
   isHighlighted: boolean;
-  onCardClicked: (cardId: number) => void;
+  onCardClicked: (cardId: string) => void;
 }
 
 const TextCard = (props: CardsProps): JSX.Element => {

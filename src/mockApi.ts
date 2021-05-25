@@ -1,5 +1,6 @@
 export const getRoundData = (): any => {
   return {
+    serverState: 1,
     memePath: 'path',
     isCzar: false,
     playerCards: [

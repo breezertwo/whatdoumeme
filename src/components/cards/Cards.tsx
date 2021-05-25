@@ -21,20 +21,20 @@ const useStyles = makeStyles<Theme, CardProps>(() =>
 
 interface Card {
   text: string;
-  cardId: number;
+  cardId: string;
 }
 
 export interface CardProps {
   playerCards: Card[];
   isCzar: boolean;
-  onCardClicked: (id: number) => void;
+  onCardClicked: (id: string) => void;
 }
 
 const Cards = (props: CardProps): JSX.Element => {
-  const [isHl, setIsHl] = useState<number>(null);
+  const [isHl, setIsHl] = useState<string>(null);
   const classes = useStyles(props);
 
-  const onCardClicked = (id: number) => {
+  const onCardClicked = (id: string) => {
     setIsHl(id);
     props.onCardClicked(id);
   };
