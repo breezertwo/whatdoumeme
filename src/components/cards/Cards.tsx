@@ -13,14 +13,15 @@ const useStyles = makeStyles<Theme, CardProps>(() =>
       margin: '5px 0',
     },
     gridList: {
-      flexWrap: (props) => (!props.isCzar ? 'nowrap' : 'wrap'),
+      flexWrap: (props) => (!props.isCzar ? 'nowrap' : 'nowrap'),
       justifyContent: (props) => (!props.isCzar ? '' : 'center'),
     },
   })
 );
 
 interface Card {
-  text: string;
+  text?: string;
+  name?: string;
   cardId: string;
 }
 
@@ -47,7 +48,8 @@ const Cards = (props: CardProps): JSX.Element => {
             onCardClicked={onCardClicked}
             key={i}
             cardId={card.cardId}
-            text={card.text}
+            isCzar={props.isCzar}
+            text={card.text ? card.text : card.name}
             isHighlighted={card.cardId === isHl}
           />
         ))}

@@ -25,9 +25,11 @@ export class MemeServer {
     this._app.use(cors());
     this._app.options('*', cors());
     this.server = createServer(this._app);
+
     this.initDb();
     this.initSocket();
     this.listen();
+
     this.activeGames = new Map();
   }
 
@@ -56,7 +58,7 @@ export class MemeServer {
     this.io.on('connection', async (socket: Socket) => {
       const cookies = cookie.parse(socket.handshake.headers.cookie);
 
-      console.log(`[I] ${socket.id} connected on port ${this.port}.`);
+      console.log(`[MS] ${socket.id} connected on port ${this.port}.`);
 
       let game;
       const userDb = await this.getUser(cookies.userName);
@@ -79,9 +81,14 @@ export class MemeServer {
           socket.join(game.id);
           console.log(socket.rooms);
 
-          socket.emit(this.GAME_RECIVE_EVENT, game);
-          if (game.state === STATES.WAITING)
+          if (game.state === STATES.WAITING) {
+            socket.emit(this.GAME_RECIVE_EVENT, game);
             socket.broadcast.to(game.id).emit('playerData', game.players);
+          } else if (
+            game.state === STATES.STARTED &&
+            game.getPlayerByName(username).length === 1
+          )
+            socket.emit(this.NEW_ROUND_EVENT, game.getNextRound(username));
         }
       }
 
@@ -97,30 +104,39 @@ export class MemeServer {
             game.leaveGame(username);
             socket.leave(game.id);
             callback();
-            console.log(`[I] ${data.senderId} left game ${data.roomId}`);
+            console.log(`[MS] ${data.senderId} left game ${data.roomId}`);
 
             this.io.to(game.id).emit('playerData', game.players);
           }
         }
       });
 
-      socket.on('startGame', async (data, callback) => {
+      socket.on('startGame', async (data) => {
         //TODO: Not safe for changed data
         const roomId = data.roomId;
         const game = this.activeGames.get(roomId as string);
         if (game) {
           game.initGame();
           for (const player of game.players) {
-            socket.broadcast
-              .to(player.socketId)
-              .emit(this.NEW_ROUND_EVENT, game.getNextRound(player.username));
+            if (player.host) {
+              socket.emit(
+                this.NEW_ROUND_EVENT,
+                game.getNextRound(player.username)
+              );
+            } else {
+              socket
+                .to(player.socketId)
+                .emit(this.NEW_ROUND_EVENT, game.getNextRound(player.username));
+            }
           }
-          console.log(`[I] ${data.roomId}: Game started`);
+          console.log(`[MS] ${data.roomId}: Game started`);
         }
       });
 
+      //socket.on('memeCardSelected', async (data) => {});
+
       socket.on('disconnect', function () {
-        console.log(`[I] ${socket.id} disconnected`);
+        console.log(`[MS] ${socket.id} disconnected`);
       });
     });
   }

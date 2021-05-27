@@ -33,3 +33,8 @@ export function removeItem<T>(arr: Array<T>, value: T): Array<T> {
   }
   return arr;
 }
+
+export function popRandom<T>(array: Array<T>): T {
+  const i = (Math.random() * array.length) | 0;
+  return array.splice(i, 1)[0];
+}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useConnection from '../../hooks/useConnection';
+import CzarView from './czarview';
 import GameView from './gameview';
 import Lobby from './lobby';
 
@@ -9,11 +10,16 @@ enum STATES {
   STARTED = 1,
   COMITTED = 2,
   ANSWERS = 3,
+  MEMELORD = 4,
+}
+
+interface ParamTypes {
+  roomId: string;
 }
 
 const Home = (): JSX.Element => {
   const [state, setState] = useState(STATES.WAITING);
-  const { roomId } = useParams<any>();
+  const { roomId } = useParams<ParamTypes>();
 
   const {
     roundData,
@@ -42,6 +48,8 @@ const Home = (): JSX.Element => {
       );
     case STATES.STARTED:
       return <GameView roundData={roundData} onCardClicked={onCardClicked} />;
+    case STATES.MEMELORD:
+      return <CzarView roundData={roundData} onCardClicked={onCardClicked} />;
     default:
       return <p>FAIL</p>;
   }

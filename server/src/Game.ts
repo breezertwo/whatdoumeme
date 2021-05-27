@@ -1,6 +1,6 @@
 import { deck } from './db/gameData';
 import { MemeCard, WhiteCard } from './interfaces/game';
-import { generateUniqueId } from './utils';
+import { generateUniqueId, popRandom } from './utils';
 
 interface Player {
   username: string;
@@ -8,6 +8,7 @@ interface Player {
   score: number;
   hasCommitted: boolean;
   host: boolean;
+  isCzar: boolean;
   cards: WhiteCard[];
   winCards: MemeCard[];
 }
@@ -17,6 +18,7 @@ export enum STATES {
   STARTED = 1,
   COMITTED = 2,
   ANSWERS = 3,
+  MEMELORD = 4,
 }
 
 export class Game {
@@ -27,6 +29,8 @@ export class Game {
 
   private deckMeme: MemeCard[];
   private deckCards: WhiteCard[];
+
+  private selectedMeme: MemeCard;
 
   constructor(host: string) {
     this._STATE = STATES.WAITING;
@@ -48,14 +52,16 @@ export class Game {
     return this._players;
   }
 
-  private getPlayerByName(playerName: string): Player[] {
-    return this._players.filter((player) => player.username === playerName);
-  }
-
   public initGame(): void {
     this.shuffleToPlayer(7);
 
-    this._STATE = STATES.STARTED;
+    // make random player czar
+    this.players[Math.floor(Math.random() * this.players.length)].isCzar = true;
+    this._STATE = STATES.MEMELORD;
+  }
+
+  public getPlayerByName(playerName: string): Player[] {
+    return this._players.filter((player) => player.username === playerName);
   }
 
   private shuffleToPlayer(amount: number): void {
@@ -99,6 +105,7 @@ export class Game {
         socketId,
         score: 0,
         hasCommitted: false,
+        isCzar: false,
         host: playerName === this._host,
         cards: [],
         winCards: [],
@@ -117,18 +124,15 @@ export class Game {
     const player = this.getPlayerByName(playerName)[0];
 
     while (player.cards.length < 7) {
+      console.log(`[G] Dealing card to ${playerName}`);
       player.cards.push(this.getWhiteCard());
     }
 
     return {
       serverState: this.state,
-      isCzar: false,
+      isCzar: player.isCzar,
       playerCards: player.cards,
+      memeCards: player.isCzar ? this.deckMeme : undefined,
     };
   }
-}
-
-function popRandom<T>(array: Array<T>): T {
-  const i = (Math.random() * array.length) | 0;
-  return array.splice(i, 1)[0];
 }

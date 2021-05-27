@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import socketIOClient, { Socket } from 'socket.io-client';
 import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
 import Cookies from 'js-cookie';
-import { getPlayers, getRoundData } from '../mockApi';
 import { useHistory } from 'react-router-dom';
 
 const NEW_ROUND_EVENT = 'newRound';
@@ -12,6 +11,8 @@ const GAME_RECIVE_EVENT = 'sendGame';
 const GET_PLAYER_EVENT = 'playerData';
 
 const CONFIRM_SELECTION_EVENT = 'confirmSelection';
+const CONFIRM_MEMESELECT_EVENT = 'confirmMeme';
+
 const SOCKET_SERVER_URL = 'http://localhost:3030';
 
 export interface SocketConnection {
