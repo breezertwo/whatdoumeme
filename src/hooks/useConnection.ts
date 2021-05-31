@@ -3,24 +3,26 @@ import socketIOClient, { Socket } from 'socket.io-client';
 import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
 import Cookies from 'js-cookie';
 import { useHistory } from 'react-router-dom';
+import { RoundData } from '../interfaces/api';
 
-const NEW_ROUND_EVENT = 'newRound';
+const GAME_RECIVE_LISTENER = 'sendGame';
+const NEW_ROUND_LISTENER = 'newRound';
+const GET_PLAYER_LISTENER = 'playerData';
+const MEME_RECEIVE_LISTENER = 'sendMeme';
+
 const LEAVE_GAME_EVENT = 'leaveGame';
 const START_GAME_EVENT = 'startGame';
-const GAME_RECIVE_EVENT = 'sendGame';
-const GET_PLAYER_EVENT = 'playerData';
-
-const CONFIRM_SELECTION_EVENT = 'confirmSelection';
 const CONFIRM_MEMESELECT_EVENT = 'confirmMeme';
+const CONFIRM_SELECTION_EVENT = 'confirmSelection';
 
 const SOCKET_SERVER_URL = 'http://localhost:3030';
-
 export interface SocketConnection {
-  roundData: any;
+  roundData: RoundData;
   playersData: any;
   serverState: number;
   startGame: () => void;
   leaveGame: () => void;
+  confirmMeme: (cardId) => void;
 }
 
 const useConnection = (roomId: string): SocketConnection => {
@@ -36,6 +38,7 @@ const useConnection = (roomId: string): SocketConnection => {
     socketRef.current = socketIOClient(SOCKET_SERVER_URL, {
       transports: ['websocket'],
       query: { roomId },
+      withCredentials: true,
     });
 
     return () => {
@@ -46,7 +49,7 @@ const useConnection = (roomId: string): SocketConnection => {
   useEffect(() => {
     if (!socketRef.current) return;
 
-    socketRef.current.on(GAME_RECIVE_EVENT, (data) => {
+    socketRef.current.on(GAME_RECIVE_LISTENER, (data) => {
       if (!Cookies.get('roomId')) {
         Cookies.set('roomId', data._id);
       }
@@ -54,15 +57,19 @@ const useConnection = (roomId: string): SocketConnection => {
       setPlayersData(data._players);
     });
 
-    socketRef.current.on(NEW_ROUND_EVENT, (data) => {
-      console.log('NR' + data);
+    socketRef.current.on(NEW_ROUND_LISTENER, (data) => {
       setRoundData({ ...data });
       setServerState(data.serverState);
     });
 
-    socketRef.current.on(GET_PLAYER_EVENT, (data) => {
-      console.log('PE' + data);
+    socketRef.current.on(GET_PLAYER_LISTENER, (data) => {
       setPlayersData([...data]);
+    });
+
+    socketRef.current.on(MEME_RECEIVE_LISTENER, (data) => {
+      const rd = { ...roundData, ...data };
+      setRoundData(rd);
+      setServerState(data.serverState);
     });
   }, []);
 
@@ -86,7 +93,21 @@ const useConnection = (roomId: string): SocketConnection => {
     });
   };
 
-  return { roundData, playersData, serverState, startGame, leaveGame };
+  const confirmMeme = (cardId) => {
+    socketRef.current.emit(CONFIRM_MEMESELECT_EVENT, {
+      roomId: Cookies.get('roomId'),
+      cardId,
+    });
+  };
+
+  return {
+    roundData,
+    playersData,
+    serverState,
+    startGame,
+    leaveGame,
+    confirmMeme,
+  };
 };
 
 export default useConnection;

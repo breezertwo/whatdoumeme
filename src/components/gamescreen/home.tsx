@@ -19,6 +19,7 @@ interface ParamTypes {
 
 const Home = (): JSX.Element => {
   const [state, setState] = useState(STATES.WAITING);
+  const [selectedCardId, setSelectedCard] = useState(null);
   const { roomId } = useParams<ParamTypes>();
 
   const {
@@ -27,10 +28,12 @@ const Home = (): JSX.Element => {
     serverState,
     startGame,
     leaveGame,
+    confirmMeme,
   } = useConnection(roomId);
 
   const onCardClicked = (id: string) => {
     console.log(id);
+    setSelectedCard(id);
   };
 
   useEffect(() => {
@@ -49,7 +52,13 @@ const Home = (): JSX.Element => {
     case STATES.STARTED:
       return <GameView roundData={roundData} onCardClicked={onCardClicked} />;
     case STATES.MEMELORD:
-      return <CzarView roundData={roundData} onCardClicked={onCardClicked} />;
+      return (
+        <CzarView
+          roundData={roundData}
+          onConfirmClicked={() => confirmMeme(selectedCardId)}
+          onCardClicked={onCardClicked}
+        />
+      );
     default:
       return <p>FAIL</p>;
   }

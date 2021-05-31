@@ -14,3 +14,11 @@ export interface Deck {
   memeCards: MemeCard[];
   whiteCards: WhiteCard[];
 }
+
+export interface RoundData {
+  serverState: number;
+  isCzar: boolean;
+  playerCards: WhiteCard[];
+  memeCards: MemeCard[] | undefined;
+  currentMeme: string | undefined;
+}

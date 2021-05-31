@@ -38,3 +38,19 @@ export function popRandom<T>(array: Array<T>): T {
   const i = (Math.random() * array.length) | 0;
   return array.splice(i, 1)[0];
 }
+
+// Array Extension
+declare global {
+  interface Array<T> {
+    cycle(fn: unknown): T;
+  }
+}
+
+if (!Array.prototype.cycle) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Array.prototype.cycle = function (fn: any) {
+    const i = this.findIndex(fn);
+    if (i === -1) return undefined;
+    return this[(i + 1) % this.length];
+  };
+}

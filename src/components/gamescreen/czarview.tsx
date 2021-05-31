@@ -21,9 +21,14 @@ const useStyles = makeStyles({
 export interface CzarViewProps {
   roundData: any;
   onCardClicked: (cardId: string) => void;
+  onConfirmClicked: () => void;
 }
 
-const CzarView = ({ roundData, onCardClicked }: CzarViewProps): JSX.Element => {
+const CzarView = ({
+  roundData,
+  onConfirmClicked,
+  onCardClicked,
+}: CzarViewProps): JSX.Element => {
   const classes = useStyles();
 
   return (
@@ -36,7 +41,9 @@ const CzarView = ({ roundData, onCardClicked }: CzarViewProps): JSX.Element => {
             playerCards={roundData.memeCards}
             isCzar={roundData.isCzar}
           />
-          <div className="confirmBtn">Confirm Selection</div>{' '}
+          <div onClick={onConfirmClicked} className="confirmBtn">
+            Confirm Selection
+          </div>{' '}
         </>
       ) : (
         <div className={classes.spinnerContainer}>

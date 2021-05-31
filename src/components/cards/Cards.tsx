@@ -3,7 +3,7 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import GridList from '@material-ui/core/GridList';
 import TextCard from './Card';
 
-const useStyles = makeStyles<Theme, CardProps>(() =>
+const useStyles = makeStyles<Theme, CardsProps>(() =>
   createStyles({
     root: {
       display: 'flex',
@@ -13,8 +13,7 @@ const useStyles = makeStyles<Theme, CardProps>(() =>
       margin: '5px 0',
     },
     gridList: {
-      flexWrap: (props) => (!props.isCzar ? 'nowrap' : 'nowrap'),
-      justifyContent: (props) => (!props.isCzar ? '' : 'center'),
+      flexWrap: 'nowrap',
     },
   })
 );
@@ -25,13 +24,13 @@ interface Card {
   cardId: string;
 }
 
-export interface CardProps {
+export interface CardsProps {
   playerCards: Card[];
   isCzar: boolean;
   onCardClicked: (id: string) => void;
 }
 
-const Cards = (props: CardProps): JSX.Element => {
+const Cards = (props: CardsProps): JSX.Element => {
   const [isHl, setIsHl] = useState<string>(null);
   const classes = useStyles(props);
 
@@ -43,16 +42,17 @@ const Cards = (props: CardProps): JSX.Element => {
   return (
     <div className={classes.root}>
       <GridList className={classes.gridList} cols={5}>
-        {props.playerCards.map((card, i) => (
-          <TextCard
-            onCardClicked={onCardClicked}
-            key={i}
-            cardId={card.cardId}
-            isCzar={props.isCzar}
-            text={card.text ? card.text : card.name}
-            isHighlighted={card.cardId === isHl}
-          />
-        ))}
+        {props.playerCards &&
+          props.playerCards.map((card, i) => (
+            <TextCard
+              onCardClicked={onCardClicked}
+              key={i}
+              cardId={card.cardId}
+              isCzar={props.isCzar}
+              text={card.text ? card.text : card.name}
+              isHighlighted={card.cardId === isHl}
+            />
+          ))}
       </GridList>
     </div>
   );

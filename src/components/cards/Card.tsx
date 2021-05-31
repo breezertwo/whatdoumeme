@@ -4,7 +4,7 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 
-const useStyles = makeStyles<Theme, CardsProps>(() =>
+const useStyles = makeStyles<Theme, CardProps>(() =>
   createStyles({
     card: {
       borderRadius: 25,
@@ -18,7 +18,7 @@ const useStyles = makeStyles<Theme, CardsProps>(() =>
   })
 );
 
-export interface CardsProps {
+export interface CardProps {
   text: string;
   cardId: string;
   isHighlighted: boolean;
@@ -26,7 +26,7 @@ export interface CardsProps {
   onCardClicked: (cardId: string) => void;
 }
 
-const TextCard = (props: CardsProps): JSX.Element => {
+const TextCard = (props: CardProps): JSX.Element => {
   const { text, isCzar, cardId, onCardClicked } = props;
   const classes = useStyles(props);
 
@@ -34,8 +34,7 @@ const TextCard = (props: CardsProps): JSX.Element => {
     <Card
       className={classes.card}
       variant="outlined"
-      onClick={() => onCardClicked(cardId)}
-    >
+      onClick={() => onCardClicked(cardId)}>
       <CardContent>
         {isCzar ? (
           <img src={`public/assets/memes/${text}`} alt="It's a meme" />
