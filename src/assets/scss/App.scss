@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Dosis:400,700');
+@import './loader.scss';
+@import './buttons.scss';
 
 :root {
   --main-white-color: #f2f2f2;
@@ -31,6 +33,10 @@ body {
   font: 16px/1.5 'Dosis', sans-serif;
   display: flex;
   flex-direction: column;
+}
+
+h1 {
+  font-size: 1.8em;
 }
 
 /* CONTAINER
@@ -157,4 +163,8 @@ body {
 
 .imgView > img {
   max-height: 500px;
+}
+
+.MuiCardContent-root > img {
+  width: 100%;
 }

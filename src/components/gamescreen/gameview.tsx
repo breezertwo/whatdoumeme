@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core';
 
 import Cards from '../cards/Cards';
 import MemeView from './memeView';
+import { RoundData } from '../../interfaces/api';
 
 const useStyles = makeStyles({
   mainContainer: {
@@ -14,22 +15,29 @@ const useStyles = makeStyles({
 });
 
 export interface GameViewProps {
-  roundData: any;
-  onCardClicked: (cardId: number) => void;
+  roundData: RoundData;
+  onCardClicked: (cardId: string) => void;
+  onConfirmClicked?: (cardId: string) => void;
 }
 
-const GameView = ({ roundData, onCardClicked }: GameViewProps): JSX.Element => {
+const GameView = ({
+  roundData,
+  onConfirmClicked,
+  onCardClicked,
+}: GameViewProps): JSX.Element => {
   const classes = useStyles();
 
   return (
     <div className={classes.mainContainer}>
-      <MemeView isCzar={roundData.isCzar} />
+      <MemeView currentMeme={roundData.currentMeme} />
       <Cards
         onCardClicked={onCardClicked}
         playerCards={roundData.playerCards}
-        isCzar={roundData.isCzar}
+        isCzar={false}
       />
-      <div className="confirmBtn">Confirm Selection</div>
+      <div onClick={() => onConfirmClicked} className="confirmBtn">
+        Confirm Selection
+      </div>
     </div>
   );
 };

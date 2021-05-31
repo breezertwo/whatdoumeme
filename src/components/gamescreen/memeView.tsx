@@ -1,14 +1,14 @@
 import React from 'react';
 
 export interface MemeViewProps {
-  isCzar: boolean;
+  currentMeme: string;
 }
 
-const MemeView = ({ isCzar }: MemeViewProps): JSX.Element => {
+const MemeView = ({ currentMeme }: MemeViewProps): JSX.Element => {
   return (
-    !isCzar && (
+    currentMeme && (
       <div className="imgView">
-        <img src="\img\y-tho-meme.jpg"></img>
+        <img src={`public/assets/memes/${currentMeme}`}></img>
       </div>
     )
   );

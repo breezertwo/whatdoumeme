@@ -4,41 +4,45 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 
-const useStyles = makeStyles<Theme, CardsProps>(() =>
+const useStyles = makeStyles<Theme, CardProps>(() =>
   createStyles({
     card: {
       borderRadius: 25,
-      minHeight: 250,
-      minWidth: 150,
-      width: 150,
-      height: 250,
+      minHeight: (props) => (!props.isCzar ? 250 : 500),
+      minWidth: (props) => (!props.isCzar ? 150 : 300),
+      height: (props) => (!props.isCzar ? 250 : 500),
+      width: (props) => (!props.isCzar ? 150 : 300),
       margin: 5,
       backgroundColor: (props) => (props.isHighlighted ? '#89e8a0' : 'white'),
     },
   })
 );
 
-export interface CardsProps {
+export interface CardProps {
   text: string;
-  cardId: number;
+  cardId: string;
   isHighlighted: boolean;
-  onCardClicked: (cardId: number) => void;
+  isCzar: boolean;
+  onCardClicked: (cardId: string) => void;
 }
 
-const TextCard = (props: CardsProps): JSX.Element => {
-  const { text, cardId, onCardClicked } = props;
+const TextCard = (props: CardProps): JSX.Element => {
+  const { text, isCzar, cardId, onCardClicked } = props;
   const classes = useStyles(props);
 
   return (
     <Card
       className={classes.card}
       variant="outlined"
-      onClick={() => onCardClicked(cardId)}
-    >
+      onClick={() => onCardClicked(cardId)}>
       <CardContent>
-        <Typography variant="body2" component="p">
-          {text}
-        </Typography>
+        {isCzar ? (
+          <img src={`public/assets/memes/${text}`} alt="It's a meme" />
+        ) : (
+          <Typography variant="body2" component="p">
+            {text}
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );
