@@ -24,11 +24,7 @@ export interface CzarViewProps {
   onConfirmClicked: () => void;
 }
 
-const CzarView = ({
-  roundData,
-  onConfirmClicked,
-  onCardClicked,
-}: CzarViewProps): JSX.Element => {
+const CzarView = ({ roundData, onConfirmClicked, onCardClicked }: CzarViewProps): JSX.Element => {
   const classes = useStyles();
 
   return (

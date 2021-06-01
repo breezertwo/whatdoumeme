@@ -3,7 +3,7 @@ import socketIOClient, { Socket } from 'socket.io-client';
 import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
 import Cookies from 'js-cookie';
 import { useHistory } from 'react-router-dom';
-import { RoundData } from '../interfaces/api';
+import { RoundData, STATES } from '../interfaces/api';
 
 const GAME_RECIVE_LISTENER = 'sendGame';
 const NEW_ROUND_LISTENER = 'newRound';
@@ -23,12 +23,13 @@ export interface SocketConnection {
   startGame: () => void;
   leaveGame: () => void;
   confirmMeme: (cardId) => void;
+  confirmCard: (cardId) => void;
 }
 
 const useConnection = (roomId: string): SocketConnection => {
   const [roundData, setRoundData] = useState({});
   const [playersData, setPlayersData] = useState([]);
-  const [serverState, setServerState] = useState(0);
+  const [serverState, setServerState] = useState(Cookies.get('roomId') ? -1 : 0);
 
   const socketRef = useRef<Socket<DefaultEventsMap, DefaultEventsMap>>(null);
   const history = useHistory();
@@ -53,8 +54,8 @@ const useConnection = (roomId: string): SocketConnection => {
       if (!Cookies.get('roomId')) {
         Cookies.set('roomId', data._id);
       }
-      setServerState(data._STATE);
       setPlayersData(data._players);
+      setServerState(data._STATE);
     });
 
     socketRef.current.on(NEW_ROUND_LISTENER, (data) => {
@@ -64,12 +65,6 @@ const useConnection = (roomId: string): SocketConnection => {
 
     socketRef.current.on(GET_PLAYER_LISTENER, (data) => {
       setPlayersData([...data]);
-    });
-
-    socketRef.current.on(MEME_RECEIVE_LISTENER, (data) => {
-      const rd = { ...roundData, ...data };
-      setRoundData(rd);
-      setServerState(data.serverState);
     });
   }, []);
 
@@ -100,12 +95,27 @@ const useConnection = (roomId: string): SocketConnection => {
     });
   };
 
+  const confirmCard = (cardId) => {
+    socketRef.current.emit(
+      CONFIRM_SELECTION_EVENT,
+      {
+        senderId: Cookies.get('userName'),
+        roomId: Cookies.get('roomId'),
+        cardId,
+      },
+      () => {
+        setServerState(STATES.COMITTED);
+      }
+    );
+  };
+
   return {
     roundData,
     playersData,
     serverState,
     startGame,
     leaveGame,
+    confirmCard,
     confirmMeme,
   };
 };

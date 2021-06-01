@@ -26,12 +26,11 @@ function generate(): string {
   return rtn;
 }
 
-export function removeItem<T>(arr: Array<T>, value: T): Array<T> {
-  const index = arr.indexOf(value);
-  if (index > -1) {
-    arr.splice(index, 1);
+export function removeItemAndReturn<T>(arr: Array<T>, fn: (value: T, index: number) => unknown): T {
+  const i = arr.findIndex(fn);
+  if (i > -1) {
+    return arr.splice(i, 1)[0];
   }
-  return arr;
 }
 
 export function popRandom<T>(array: Array<T>): T {
@@ -42,13 +41,12 @@ export function popRandom<T>(array: Array<T>): T {
 // Array Extension
 declare global {
   interface Array<T> {
-    cycle(fn: unknown): T;
+    cycle(fn: (value: T, index: number) => unknown): T;
   }
 }
 
 if (!Array.prototype.cycle) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Array.prototype.cycle = function (fn: any) {
+  Array.prototype.cycle = function <T>(fn: (this: T[], value: T, index: number) => unknown) {
     const i = this.findIndex(fn);
     if (i === -1) return undefined;
     return this[(i + 1) % this.length];
