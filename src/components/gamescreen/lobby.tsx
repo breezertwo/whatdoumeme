@@ -47,11 +47,7 @@ export interface LobbyProps {
   onStartClick: () => void;
 }
 
-const Lobby = ({
-  players,
-  onStartClick,
-  onLeaveClick,
-}: LobbyProps): JSX.Element => {
+const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.Element => {
   const [isHost, setIsHost] = useState(false);
   const classes = useStyles();
 
@@ -60,9 +56,7 @@ const Lobby = ({
 
   useEffect(() => {
     if (players.length > 0) {
-      const player = players.filter(
-        (player) => player.username === Cookies.get('userName')
-      )[0];
+      const player = players.filter((player) => player.username === Cookies.get('userName'))[0];
       if (player) {
         setIsHost((player as any).host);
       }
@@ -86,10 +80,7 @@ const Lobby = ({
       </div>
       <List component="nav">
         {players.map((player, i) => (
-          <ListItem
-            key={i}
-            className={player.host ? classes.itemHost : classes.item}
-          >
+          <ListItem key={i} className={player.host ? classes.itemHost : classes.item}>
             <div className={classes.listContainer}>
               {player.username}
               {player.host ? <PersonIcon /> : null}
