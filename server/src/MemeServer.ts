@@ -1,3 +1,5 @@
+//TODO: Whole API is vulnerable for changed front end data. OK for playing with friends. If ever released as stand alone website: FIX!
+
 import express from 'express';
 import cookie from 'cookie';
 import { connect } from 'mongoose';
@@ -6,7 +8,7 @@ import { createServer, Server as HttpServer } from 'http';
 import cors from 'cors';
 
 import User, { IUser } from './db/userSchema';
-import { Game, STATES } from './Game';
+import Game, { STATES } from './Game';
 
 interface UserData {
   user: IUser;
@@ -16,7 +18,6 @@ interface UserData {
 export class MemeServer {
   private static readonly GAME_RECEIVE_EVENT: string = 'sendGame';
   private static readonly NEW_ROUND_EVENT: string = 'newRound';
-  private static readonly MEME_RECEIVE_EVENT: string = 'sendMeme';
   private static readonly GET_PLAYER_EVENT: string = 'playerData';
 
   private static readonly ON_CONNECTION_LISTENER: string = 'connection';
@@ -24,6 +25,7 @@ export class MemeServer {
   private static readonly ON_LEAVEGAME_LISTENER: string = 'leaveGame';
   private static readonly ON_STARTGAME_LISTENER: string = 'startGame';
   private static readonly ON_MEMESELECTED_LISTENER: string = 'confirmMeme';
+  private static readonly ON_CARDSELECTCONFIRM_LISTENER: string = 'confirmSelection';
 
   public static readonly PORT: number = 3030;
   private _app: express.Application;
@@ -90,24 +92,26 @@ export class MemeServer {
         }
 
         if (game) {
-          console.log(socket.rooms);
           game.joinGame(username, socket.id);
           socket.join(game.id);
-          console.log(socket.rooms);
+          console.log(`[MS] ${username} joined game ${game.id}.`);
 
+          const player = game.getPlayerByName(username);
           if (game.state === STATES.WAITING) {
             socket.emit(MemeServer.GAME_RECEIVE_EVENT, game);
-            socket.broadcast
-              .to(game.id)
-              .emit(MemeServer.GET_PLAYER_EVENT, game.players);
+            socket.broadcast.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.players);
           } else if (
             (game.state === STATES.STARTED || game.state === STATES.MEMELORD) &&
-            game.getPlayerByName(username).length === 1
-          )
-            socket.emit(
-              MemeServer.NEW_ROUND_EVENT,
-              game.getNextRound(username)
-            );
+            player.length
+          ) {
+            if (!player[0].hasCommitted)
+              socket.emit(MemeServer.NEW_ROUND_EVENT, game.getRound(username));
+            else
+              socket.emit(MemeServer.NEW_ROUND_EVENT, {
+                ...game.getRound(username),
+                serverState: STATES.COMITTED,
+              });
+          }
         }
       }
 
@@ -141,12 +145,18 @@ export class MemeServer {
         const { game } = await this.getUserData(data);
 
         if (game) {
-          const card = game.setSelectedMeme(data.cardId);
-          emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT, {
-            currentMeme: card.name,
-          });
-
+          game.setSelectedMeme(data.cardId);
+          emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
           //game.setNextCzar();
+        }
+      });
+
+      socket.on(MemeServer.ON_CARDSELECTCONFIRM_LISTENER, async (data, callback) => {
+        const { user, game } = await this.getUserData(data);
+
+        if (game) {
+          game.setSelectedPlayerCard(user.username, data.cardId);
+          callback();
         }
       });
 
@@ -157,18 +167,18 @@ export class MemeServer {
       const emitRoundToAllPlayersInGame = (
         game: Game,
         event: string,
-        msg?: Record<string, unknown>
+        extRoundData?: Record<string, unknown>
       ): void => {
         for (const player of game.players) {
           if (player.socketId == socket.id)
             socket.emit(event, {
-              ...game.getNextRound(player.username),
-              ...msg,
+              ...game.getRound(player.username),
+              ...extRoundData,
             });
           else
             socket.to(player.socketId).emit(event, {
-              ...game.getNextRound(player.username),
-              ...msg,
+              ...game.getRound(player.username),
+              ...extRoundData,
             });
         }
       };
@@ -189,9 +199,8 @@ export class MemeServer {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async getUserData(data: any): Promise<UserData> {
-    //TODO: Not safe for changed data
     const user = data.senderId ? await this.getUser(data.senderId) : undefined;
-    const roomId = data.roomId || '';
+    const roomId = data.roomId || undefined;
     const game = this.activeGames.get(roomId as string);
 
     return { user, game, roomId };

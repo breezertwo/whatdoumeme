@@ -1,24 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useConnection from '../../hooks/useConnection';
+import { STATES } from '../../interfaces/api';
 import CzarView from './czarview';
 import GameView from './gameview';
 import Lobby from './lobby';
-
-enum STATES {
-  WAITING = 0,
-  STARTED = 1,
-  COMITTED = 2,
-  ANSWERS = 3,
-  MEMELORD = 4,
-}
 
 interface ParamTypes {
   roomId: string;
 }
 
 const Home = (): JSX.Element => {
-  const [state, setState] = useState(STATES.WAITING);
   const [selectedCardId, setSelectedCard] = useState(null);
   const { roomId } = useParams<ParamTypes>();
 
@@ -28,6 +20,7 @@ const Home = (): JSX.Element => {
     serverState,
     startGame,
     leaveGame,
+    confirmCard,
     confirmMeme,
   } = useConnection(roomId);
 
@@ -36,21 +29,18 @@ const Home = (): JSX.Element => {
     setSelectedCard(id);
   };
 
-  useEffect(() => {
-    setState(serverState);
-  }, [serverState]);
-
-  switch (state) {
+  switch (serverState) {
     case STATES.WAITING:
+      return <Lobby players={playersData} onStartClick={startGame} onLeaveClick={leaveGame} />;
+    case STATES.STARTED:
       return (
-        <Lobby
-          players={playersData}
-          onStartClick={startGame}
+        <GameView
+          roundData={roundData}
+          onConfirmClicked={() => confirmCard(selectedCardId)}
+          onCardClicked={onCardClicked}
           onLeaveClick={leaveGame}
         />
       );
-    case STATES.STARTED:
-      return <GameView roundData={roundData} onCardClicked={onCardClicked} />;
     case STATES.MEMELORD:
       return (
         <CzarView
@@ -59,6 +49,10 @@ const Home = (): JSX.Element => {
           onCardClicked={onCardClicked}
         />
       );
+    case STATES.COMITTED:
+      return <p>COMITTED</p>;
+    case STATES.LOADING:
+      return <div className="loader"></div>;
     default:
       return <p>FAIL</p>;
   }

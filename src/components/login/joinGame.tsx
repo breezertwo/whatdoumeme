@@ -1,10 +1,12 @@
 import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import { useLoginStyles } from './login';
 
 const JoinGame = (): JSX.Element => {
   const [roomName, setRoomName] = useState('');
   const history = useHistory();
+  const classes = useLoginStyles();
 
   const handleRoomNameChange = (event) => {
     setRoomName(event.target.value);
@@ -18,7 +20,7 @@ const JoinGame = (): JSX.Element => {
   }, []);
 
   return (
-    <div className="loginContainer">
+    <div className={classes.loginContainer}>
       <Link to={`room/:create`} className="enterRoomBtn">
         Create game
       </Link>
@@ -27,7 +29,7 @@ const JoinGame = (): JSX.Element => {
         placeholder="Room"
         value={roomName}
         onChange={handleRoomNameChange}
-        className="textInput"
+        className={classes.textInput}
       />
       <Link to={`room/${roomName}`} className="enterRoomBtn">
         Join game

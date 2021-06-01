@@ -1,3 +1,13 @@
+// Serverstates
+export enum STATES {
+  LOADING = -1,
+  WAITING = 0,
+  STARTED = 1,
+  COMITTED = 2,
+  ANSWERS = 3,
+  MEMELORD = 4,
+}
+
 // TODO: Type API
 
 export interface RoundData {
