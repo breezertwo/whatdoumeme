@@ -2,8 +2,8 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core';
 
 import Cards from '../cards/Cards';
-import MemeView from './memeView';
-import { RoundData } from '../../interfaces/api';
+import { RoundData } from '../../../interfaces/api';
+import { MemeView } from './subviews/memeSubView';
 
 const useStyles = makeStyles({
   mainContainer: {
@@ -21,7 +21,7 @@ export interface GameViewProps {
   onLeaveClick: () => void;
 }
 
-const GameView = ({
+export const GameView = ({
   roundData,
   onConfirmClicked,
   onCardClicked,
@@ -42,5 +42,3 @@ const GameView = ({
     </div>
   );
 };
-
-export default GameView;

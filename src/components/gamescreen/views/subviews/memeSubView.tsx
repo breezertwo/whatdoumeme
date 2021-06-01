@@ -4,7 +4,7 @@ export interface MemeViewProps {
   currentMeme: string;
 }
 
-const MemeView = ({ currentMeme }: MemeViewProps): JSX.Element => {
+export const MemeView = ({ currentMeme }: MemeViewProps): JSX.Element => {
   return (
     currentMeme && (
       <div className="imgView">
@@ -13,5 +13,3 @@ const MemeView = ({ currentMeme }: MemeViewProps): JSX.Element => {
     )
   );
 };
-
-export default MemeView;

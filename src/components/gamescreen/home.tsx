@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+
 import useConnection from '../../hooks/useConnection';
-import { STATES } from '../../interfaces/api';
-import CzarView from './czarview';
-import GameView from './gameview';
+import LoadingSpinner from '../common/loadingSpinner';
 import Lobby from './lobby';
+import { CzarView, GameView } from './views';
+import { STATES } from '../../interfaces/api';
 
 interface ParamTypes {
   roomId: string;
 }
 
 const Home = (): JSX.Element => {
-  const [selectedCardId, setSelectedCard] = useState(null);
+  const [selectedCardId, setSelectedCard] = useState<string>(null);
   const { roomId } = useParams<ParamTypes>();
 
   const {
@@ -52,7 +53,7 @@ const Home = (): JSX.Element => {
     case STATES.COMITTED:
       return <p>COMITTED</p>;
     case STATES.LOADING:
-      return <div className="loader"></div>;
+      return <LoadingSpinner msg={'Game is loading...'} />;
     default:
       return <p>FAIL</p>;
   }

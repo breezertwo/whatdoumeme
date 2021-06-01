@@ -22,8 +22,8 @@ export interface SocketConnection {
   serverState: number;
   startGame: () => void;
   leaveGame: () => void;
-  confirmMeme: (cardId) => void;
-  confirmCard: (cardId) => void;
+  confirmMeme: (cardId: string) => void;
+  confirmCard: (cardId: string) => void;
 }
 
 const useConnection = (roomId: string): SocketConnection => {

@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core';
 
 import Cards from '../cards/Cards';
-import MemeView from './memeView';
+import LoadingSpinner from '../../common/loadingSpinner';
 
 const useStyles = makeStyles({
   mainContainer: {
@@ -10,11 +10,6 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     flexGrow: 1,
-  },
-  spinnerContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
   },
 });
 
@@ -24,7 +19,11 @@ export interface CzarViewProps {
   onConfirmClicked: () => void;
 }
 
-const CzarView = ({ roundData, onConfirmClicked, onCardClicked }: CzarViewProps): JSX.Element => {
+export const CzarView = ({
+  roundData,
+  onConfirmClicked,
+  onCardClicked,
+}: CzarViewProps): JSX.Element => {
   const classes = useStyles();
 
   return (
@@ -42,13 +41,8 @@ const CzarView = ({ roundData, onConfirmClicked, onCardClicked }: CzarViewProps)
           </div>{' '}
         </>
       ) : (
-        <div className={classes.spinnerContainer}>
-          <h1>Wait until czar selects a meme...</h1>
-          <div className="loader"></div>
-        </div>
+        <LoadingSpinner msg={'Wait until czar selects a meme...'} />
       )}
     </div>
   );
 };
-
-export default CzarView;
