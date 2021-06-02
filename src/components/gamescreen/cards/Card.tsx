@@ -8,10 +8,10 @@ const useStyles = makeStyles<Theme, CardProps>(() =>
   createStyles({
     card: {
       borderRadius: 25,
-      minHeight: (props) => (!props.isCzar ? 250 : 500),
-      minWidth: (props) => (!props.isCzar ? 150 : 300),
-      height: (props) => (!props.isCzar ? 250 : 500),
-      width: (props) => (!props.isCzar ? 150 : 300),
+      minHeight: (props) => (props.isCzar && !props.isShowComitted ? 500 : 250),
+      minWidth: (props) => (props.isCzar && !props.isShowComitted ? 300 : 150),
+      height: (props) => (props.isCzar && !props.isShowComitted ? 500 : 250),
+      width: (props) => (props.isCzar && !props.isShowComitted ? 300 : 150),
       margin: 5,
       backgroundColor: (props) => (props.isHighlighted ? '#89e8a0' : 'white'),
     },
@@ -23,6 +23,7 @@ export interface CardProps {
   cardId: string;
   isHighlighted: boolean;
   isCzar: boolean;
+  isShowComitted: boolean;
   onCardClicked: (cardId: string) => void;
 }
 

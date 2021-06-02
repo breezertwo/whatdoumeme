@@ -13,7 +13,8 @@ const useStyles = makeStyles<Theme, CardsProps>(() =>
       margin: '5px 0',
     },
     gridList: {
-      flexWrap: 'nowrap',
+      flexWrap: (props) => (props.isCzar && props.isShowComitted ? 'wrap' : 'nowrap'),
+      justifyContent: (props) => (props.isCzar && props.isShowComitted ? 'center' : ''),
     },
   })
 );
@@ -26,29 +27,36 @@ interface Card {
 
 export interface CardsProps {
   playerCards: Card[];
-  isCzar: boolean;
+  isCzar?: boolean;
+  isShowComitted?: boolean;
   onCardClicked: (id: string) => void;
 }
 
-const Cards = (props: CardsProps): JSX.Element => {
+const Cards = ({
+  playerCards,
+  isCzar = false,
+  isShowComitted = false,
+  onCardClicked,
+}: CardsProps): JSX.Element => {
   const [isHl, setIsHl] = useState<string>(null);
-  const classes = useStyles(props);
+  const classes = useStyles({ playerCards, isCzar, isShowComitted, onCardClicked });
 
-  const onCardClicked = (id: string) => {
+  const onCardClickedInner = (id: string) => {
     setIsHl(id);
-    props.onCardClicked(id);
+    onCardClicked(id);
   };
 
   return (
     <div className={classes.root}>
       <GridList className={classes.gridList} cols={5}>
-        {props.playerCards &&
-          props.playerCards.map((card, i) => (
+        {playerCards &&
+          playerCards.map((card, i) => (
             <TextCard
-              onCardClicked={onCardClicked}
+              onCardClicked={onCardClickedInner}
               key={i}
               cardId={card.cardId}
-              isCzar={props.isCzar}
+              isCzar={isCzar}
+              isShowComitted={isShowComitted}
               text={card.text ? card.text : card.name}
               isHighlighted={card.cardId === isHl}
             />
