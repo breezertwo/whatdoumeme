@@ -2,3 +2,6 @@
 dist/
 node_modules/
 src/**/*.jsx
+
+server/tools/*
+!server/tools/deckIntake.js
