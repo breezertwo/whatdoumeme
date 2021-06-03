@@ -89,8 +89,8 @@ h1 {
   flex-direction: column;
   flex-grow: 1;
   min-height: 350px;
-  background: var(--main-purple-color) url(../img/wp5144392.png) no-repeat
-    center / cover;
+  align-items: center;
+  background: var(--main-purple-color) url(../img/wp5144392.png) no-repeat center / cover;
   background-blend-mode: luminosity;
   color: var(--main-black-color);
 }
@@ -162,7 +162,7 @@ h1 {
 }
 
 .imgView > img {
-  max-height: 500px;
+  max-height: 350px;
 }
 
 .MuiCardContent-root > img {

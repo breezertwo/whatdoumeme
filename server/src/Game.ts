@@ -20,6 +20,7 @@ export enum STATES {
   COMITTED = 2,
   ANSWERS = 3,
   MEMELORD = 4,
+  SELECTING = 5,
 }
 
 export default class Game {
@@ -40,9 +41,10 @@ export default class Game {
     this._id = generateUniqueId();
     this._host = host;
 
-    this.selectedMeme = undefined;
     this.deckMeme = [];
     this.deckCards = [];
+
+    this.selectedMeme = undefined;
     this.currentPlayedCards = [];
 
     this.loadDeck();
@@ -86,6 +88,7 @@ export default class Game {
   private loadDeck(): void {
     const _deck = deepcopy(deck);
 
+    /*
     _deck.memeCards.forEach((card, index) => {
       card.cardId = `M${index}`;
     });
@@ -93,6 +96,7 @@ export default class Game {
     _deck.whiteCards.forEach((card, index) => {
       card.cardId = `C${index}`;
     });
+    */
 
     this.deckMeme = _deck.memeCards;
     this.deckCards = _deck.whiteCards;
@@ -103,7 +107,7 @@ export default class Game {
     return this.deckCards.splice((this.deckCards.length * Math.random()) | 0, 1)[0];
   }
 
-  public joinGame(playerName: string, socketId: string): Game {
+  public joinGame(playerName: string, socketId: string): void {
     const player = this.getPlayerByName(playerName);
     if (!player.length)
       this._players.push({
@@ -119,8 +123,6 @@ export default class Game {
     else if (player.length && player[0].socketId != socketId) {
       player[0].socketId = socketId;
     }
-
-    return this;
   }
 
   public leaveGame(playerName: string): Player[] {
@@ -136,10 +138,16 @@ export default class Game {
       player.cards.push(this.getWhiteCard());
     }
 
+    // Kill it, with fire...
     return {
       serverState: this.state,
       isCzar: player.isCzar,
-      playerCards: player.cards,
+      playerCards:
+        this._STATE !== STATES.SELECTING
+          ? player.cards
+          : player.isCzar
+          ? this.currentPlayedCards
+          : [],
       currentMeme: this.selectedMeme ? this.selectedMeme.name : undefined,
       memeCards: player.isCzar && this._STATE === STATES.MEMELORD ? this.deckMeme : undefined,
     };
@@ -158,9 +166,16 @@ export default class Game {
   public setSelectedPlayerCard(playerName: string, cardId: string): void {
     const player = this.getPlayerByName(playerName)[0];
     const card = removeItemAndReturn(player.cards, (card) => card.cardId === cardId);
+
     player.hasCommitted = true;
     this.currentPlayedCards.push(card);
+
     console.log(`[G] ${player.username} choose card ${card.cardId}`);
+
+    if (this.currentPlayedCards.length === this.players.length - 1) {
+      console.log(`[G] ${this._id} round ended`);
+      this._STATE = STATES.SELECTING;
+    }
   }
 
   public setNextCzar(): void {

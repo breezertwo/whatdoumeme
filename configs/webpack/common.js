@@ -1,11 +1,10 @@
 // shared config (dev and prod)
 const { resolve } = require('path');
-const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    extensions: ['.ts', '.tsx'],
   },
   context: resolve(__dirname, '../../src'),
   module: {
@@ -37,12 +36,7 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    new HtmlWebpackPlugin({ template: 'index.html.ejs' }),
-    new CopyPlugin({
-      patterns: [{ from: 'assets/img', to: 'img' }],
-    }),
-  ],
+  plugins: [new HtmlWebpackPlugin({ template: 'index.html.ejs' })],
   performance: {
     hints: false,
   },

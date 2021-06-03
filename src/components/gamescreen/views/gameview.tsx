@@ -8,10 +8,12 @@ import LoadingSpinner from '../../common/loadingSpinner';
 
 const useStyles = makeStyles({
   mainContainer: {
-    justifyContent: 'space-around',
     display: 'flex',
-    flexDirection: 'column',
     flexGrow: 1,
+    justifyContent: 'space-around',
+    flexDirection: 'column',
+    width: '100%',
+    maxWidth: '600px',
   },
 });
 
@@ -31,13 +33,20 @@ export const GameView = ({
   const { currentMeme, playerCards, serverState } = roundData;
   const classes = useStyles();
 
-  return !roundData.isCzar ? (
+  const czarIsSelecting = serverState === STATES.SELECTING;
+
+  const loadingMessage = (isSelecting: boolean): string => {
+    if (isSelecting) return 'Wait until czar selects his winning cards..';
+    return 'Wait until players select cards...';
+  };
+
+  return (!roundData.isCzar && !czarIsSelecting) || (roundData.isCzar && czarIsSelecting) ? (
     <div className={classes.mainContainer}>
       <MemeView currentMeme={currentMeme} />
       <Cards
         onCardClicked={onCardClicked}
         playerCards={playerCards}
-        isShowComitted={serverState === STATES.SELECTING}
+        isShowComitted={czarIsSelecting}
       />
       <div onClick={onConfirmClicked} className="confirmBtn">
         Confirm Selection
@@ -47,6 +56,6 @@ export const GameView = ({
       </div>
     </div>
   ) : (
-    <LoadingSpinner msg={'Wait until players select cards...'} />
+    <LoadingSpinner msg={loadingMessage(czarIsSelecting)} />
   );
 };

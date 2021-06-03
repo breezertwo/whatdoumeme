@@ -27,20 +27,23 @@ export class MemeServer {
   private static readonly ON_MEMESELECTED_LISTENER: string = 'confirmMeme';
   private static readonly ON_CARDSELECTCONFIRM_LISTENER: string = 'confirmSelection';
 
-  public static readonly PORT: number = 3030;
+  private static readonly PORT: number = 3030;
+
   private _app: express.Application;
-  private server: HttpServer;
+  private _server: HttpServer;
+  private _port: string | number;
+
   private io: Server;
-  private port: string | number;
 
-  private activeGames: Map<string, Game> = new Map();
-
+  private activeGames: Map<string, Game>;
   constructor() {
     this._app = express();
-    this.port = process.env.PORT || MemeServer.PORT;
+    this._port = process.env.PORT || MemeServer.PORT;
     this._app.use(cors());
     this._app.options('*', cors());
-    this.server = createServer(this._app);
+    this._server = createServer(this._app);
+
+    this.activeGames = new Map();
 
     this.initDb();
     this.initSocket();
@@ -52,7 +55,7 @@ export class MemeServer {
   }
 
   private initSocket(): void {
-    this.io = new Server(this.server);
+    this.io = new Server(this._server);
   }
 
   private async initDb(): Promise<void> {
@@ -69,12 +72,12 @@ export class MemeServer {
   }
 
   private listen(): void {
-    this.server.listen(this.port, () => {
-      console.log('[MS] Running server on port %s', this.port);
+    this._server.listen(this._port, () => {
+      console.log('[MS] Running server on port %s', this._port);
     });
 
     this.io.on(MemeServer.ON_CONNECTION_LISTENER, async (socket: Socket) => {
-      console.log(`[MS] ${socket.id} connected on port ${this.port}.`);
+      console.log(`[MS] ${socket.id} connected on port ${this._port}.`);
 
       let game;
       const cookies = cookie.parse(socket.handshake.headers.cookie);
@@ -101,7 +104,9 @@ export class MemeServer {
             socket.emit(MemeServer.GAME_RECEIVE_EVENT, game);
             socket.broadcast.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.players);
           } else if (
-            (game.state === STATES.STARTED || game.state === STATES.MEMELORD) &&
+            (game.state === STATES.STARTED ||
+              game.state === STATES.SELECTING ||
+              game.state === STATES.MEMELORD) &&
             player.length
           ) {
             if (!player[0].hasCommitted)
@@ -155,8 +160,13 @@ export class MemeServer {
         const { user, game } = await this.getUserData(data);
 
         if (game) {
+          console.log(game.state);
           game.setSelectedPlayerCard(user.username, data.cardId);
           callback();
+          console.log(game.state);
+          if (game.state === STATES.SELECTING) {
+            emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
+          }
         }
       });
 

@@ -11,15 +11,15 @@ Example Deck
 const deck: Deck = {
   memeCards: [
     {
-      name: 'meme1.jpg',
-      cardId: '',
+      name: 'meme0.jpg',
+      cardId: 'M0',
     },
     ...
   ],
   whiteCards: [
     {
       text: 'When your heart says yes but the restraining order says no',
-      cardId: '',
+      cardId: 'C0',
     },
     ...
   ],
