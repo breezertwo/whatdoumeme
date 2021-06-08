@@ -15,10 +15,6 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
-      },
-      {
         test: /\.(scss|sass)$/,
         use: ['style-loader', 'css-loader', 'sass-loader'],
       },
@@ -35,6 +31,13 @@ module.exports = {
         ],
       },
     ],
+  },
+  optimization: {
+    moduleIds: 'deterministic',
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'all',
+    },
   },
   plugins: [new HtmlWebpackPlugin({ template: 'index.html.ejs' })],
   performance: {

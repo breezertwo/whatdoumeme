@@ -1,6 +1,7 @@
 // production config
+const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { merge } = require('webpack-merge');
-const { resolve } = require('path');
 
 const commonConfig = require('./common');
 
@@ -8,19 +9,16 @@ module.exports = merge(commonConfig, {
   mode: 'production',
   entry: './index.tsx',
   output: {
-    filename: (pathData) => {
-      let name = pathData.chunk.name;
-      if (name === undefined) {
-        // undef for vendors
-        name = pathData.chunk.id;
-        if (name.includes('vendors-')) {
-          name = 'vendors';
-        }
-      }
-      return `${name}.min.js`;
-    },
-    path: resolve(__dirname, '../../dist'),
-    publicPath: '/',
+    path: path.resolve(__dirname, '../../dist'),
+    filename: '[name].[contenthash].js',
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(scss|sass)$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+      },
+    ],
   },
   devtool: 'source-map',
   optimization: {
@@ -35,5 +33,5 @@ module.exports = merge(commonConfig, {
       },
     },
   },
-  plugins: [],
+  plugins: [new MiniCssExtractPlugin()],
 });
