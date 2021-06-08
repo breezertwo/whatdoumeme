@@ -11,8 +11,8 @@ const useStyles = makeStyles({
 
 export interface ButtonContainerProps {
   active: boolean;
-  onConfirmClicked: () => void;
-  onLeaveClick: () => void;
+  onConfirmClicked?: () => void;
+  onLeaveClick?: () => void;
 }
 
 export const ButtonContainer = ({
@@ -25,12 +25,16 @@ export const ButtonContainer = ({
   return (
     active && (
       <div className={classes.buttonContainer}>
-        <div onClick={onConfirmClicked} className="confirmBtn">
-          Confirm Selection
-        </div>
-        <div onClick={onLeaveClick} className="confirmBtn cnclBtn">
-          Leave Game
-        </div>
+        {onConfirmClicked && (
+          <div onClick={onConfirmClicked} className="confirmBtn">
+            Confirm Selection
+          </div>
+        )}
+        {onLeaveClick && (
+          <div onClick={onLeaveClick} className="confirmBtn cnclBtn">
+            Leave Game
+          </div>
+        )}
       </div>
     )
   );
