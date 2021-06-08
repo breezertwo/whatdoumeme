@@ -1,19 +1,9 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core';
 
 import Cards from '../cards/Cards';
 import LoadingSpinner from '../../common/loadingSpinner';
 import { RoundData } from '../../../interfaces/api';
-
-const useStyles = makeStyles({
-  mainContainer: {
-    justifyContent: 'space-around',
-    display: 'flex',
-    flexDirection: 'column',
-    flexGrow: 1,
-    maxWidth: '600px',
-  },
-});
+import { useMainContianerStyles } from './styles/sharedStyles';
 
 export interface CzarViewProps {
   roundData: RoundData;
@@ -26,7 +16,7 @@ export const CzarView = ({
   onConfirmClicked,
   onCardClicked,
 }: CzarViewProps): JSX.Element => {
-  const classes = useStyles();
+  const classes = useMainContianerStyles();
 
   return (
     <div className={classes.mainContainer}>

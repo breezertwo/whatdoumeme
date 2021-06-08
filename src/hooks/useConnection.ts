@@ -27,7 +27,7 @@ export interface SocketConnection {
 }
 
 const useConnection = (roomId: string): SocketConnection => {
-  const [roundData, setRoundData] = useState({});
+  const [roundData, setRoundData] = useState<RoundData>({});
   const [playersData, setPlayersData] = useState([]);
   const [serverState, setServerState] = useState(Cookies.get('roomId') ? -1 : 0);
 
@@ -106,7 +106,8 @@ const useConnection = (roomId: string): SocketConnection => {
         roomId: Cookies.get('roomId'),
         cardId,
       },
-      () => {
+      (data) => {
+        setRoundData({ ...roundData, randomMeme: data });
         setServerState(STATES.COMITTED);
       }
     );

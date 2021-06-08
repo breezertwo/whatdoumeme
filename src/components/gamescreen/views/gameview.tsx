@@ -1,21 +1,10 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core';
+import React, { useState } from 'react';
 
 import Cards from '../cards/Cards';
 import { RoundData, STATES } from '../../../interfaces/api';
 import LoadingSpinner from '../../common/loadingSpinner';
 import { ButtonContainer, MemeView } from './subviews';
-
-const useStyles = makeStyles({
-  mainContainer: {
-    display: 'flex',
-    flexGrow: 1,
-    justifyContent: 'space-around',
-    flexDirection: 'column',
-    width: '100%',
-    maxWidth: '600px',
-  },
-});
+import { useMainContianerStyles } from './styles/sharedStyles';
 
 export interface GameViewProps {
   roundData: RoundData;
@@ -30,12 +19,18 @@ export const GameView = ({
   onCardClicked,
   onLeaveClick,
 }: GameViewProps): JSX.Element => {
+  const [confirmed, setConfirmed] = useState(false);
   const { currentMeme, playerCards, serverState } = roundData;
-  const classes = useStyles();
+  const classes = useMainContianerStyles();
 
   const czarIsSelecting = serverState === STATES.ANSWERS;
 
-  return !roundData.isCzar || (roundData.isCzar && czarIsSelecting) ? (
+  const onConfirmClickedLocal = () => {
+    setConfirmed(true);
+    onConfirmClicked();
+  };
+
+  return (!roundData.isCzar || (roundData.isCzar && czarIsSelecting)) && !confirmed ? (
     <div className={classes.mainContainer}>
       <MemeView currentMeme={currentMeme} />
       <Cards
@@ -45,11 +40,13 @@ export const GameView = ({
       />
       <ButtonContainer
         active={!czarIsSelecting || (czarIsSelecting && roundData.isCzar)}
-        onConfirmClicked={onConfirmClicked}
+        onConfirmClicked={onConfirmClickedLocal}
         onLeaveClick={onLeaveClick}
       />
     </div>
   ) : (
-    <LoadingSpinner msg={'Wait until players select cards...'} />
+    <LoadingSpinner
+      msg={!confirmed ? 'Wait until players select cards...' : 'Committing answer...'}
+    />
   );
 };

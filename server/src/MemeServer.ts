@@ -9,6 +9,7 @@ import cors from 'cors';
 
 import User, { IUser } from './db/userSchema';
 import Game, { STATES } from './Game';
+import { fetchRandomMeme } from './utils';
 
 interface UserData {
   user: IUser;
@@ -157,9 +158,10 @@ export class MemeServer {
 
         if (game) {
           game.setSelectedPlayerCard(user.username, data.cardId);
-          callback();
           if (game.state === STATES.ANSWERS) {
             emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
+          } else {
+            callback(await fetchRandomMeme());
           }
         }
       });

@@ -1,3 +1,5 @@
+import fetch from 'node-fetch';
+
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const ID_LENGTH = 6;
 const UNIQUE_RETRIES = 9999;
@@ -26,6 +28,12 @@ function generate(): string {
   return rtn;
 }
 
+export const fetchRandomMeme = async (): Promise<string> => {
+  const body = await (await fetch(`https://reddit.com/r/meme/top/.json`)).json();
+  const i = (Math.random() * body.data.children.length) | 0;
+  const url = body.data.children[i].data.url;
+  return url;
+};
 // Array Extension
 declare global {
   interface Array<T> {
@@ -38,8 +46,8 @@ declare global {
 if (!Array.prototype.cycle) {
   Array.prototype.cycle = function <T>(fn: (this: T[], value: T) => unknown) {
     const i = this.findIndex(fn);
-    if (i === -1) return undefined;
-    return this[(i + 1) % this.length];
+    if (i > -1) return this[(i + 1) % this.length];
+    return undefined;
   };
 }
 

@@ -17,4 +17,5 @@ export interface RoundData {
   memeCards?: any[];
   currentMeme?: string;
   serverState?: number;
+  randomMeme?: string;
 }

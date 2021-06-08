@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import useConnection from '../../hooks/useConnection';
 import LoadingSpinner from '../common/loadingSpinner';
 import Lobby from './lobby';
-import { CzarView, GameView } from './views';
+import { CzarView, GameView, CommittedView } from './views';
 import { STATES } from '../../interfaces/api';
 
 interface ParamTypes {
@@ -52,7 +52,7 @@ const Home = (): JSX.Element => {
         />
       );
     case STATES.COMITTED:
-      return <p>COMITTED</p>;
+      return <CommittedView memeURL={roundData.randomMeme} />;
     case STATES.LOADING:
       return <LoadingSpinner msg={'Game is loading...'} />;
     default:
