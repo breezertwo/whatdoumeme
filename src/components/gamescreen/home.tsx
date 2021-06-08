@@ -34,7 +34,7 @@ const Home = (): JSX.Element => {
     case STATES.WAITING:
       return <Lobby players={playersData} onStartClick={startGame} onLeaveClick={leaveGame} />;
     case STATES.STARTED:
-    case STATES.SELECTING:
+    case STATES.ANSWERS:
       return (
         <GameView
           roundData={roundData}

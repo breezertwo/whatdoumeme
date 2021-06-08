@@ -26,6 +26,7 @@ export class MemeServer {
   private static readonly ON_STARTGAME_LISTENER: string = 'startGame';
   private static readonly ON_MEMESELECTED_LISTENER: string = 'confirmMeme';
   private static readonly ON_CARDSELECTCONFIRM_LISTENER: string = 'confirmSelection';
+  private static readonly ON_WINNERCONFIRM_LISTENER: string = 'confirmSelectionWinner';
 
   private static readonly PORT: number = 3030;
 
@@ -97,7 +98,6 @@ export class MemeServer {
         if (game) {
           game.joinGame(username, socket.id);
           socket.join(game.id);
-          console.log(`[MS] ${username} joined game ${game.id}.`);
 
           const player = game.getPlayerByName(username);
           if (game.state === STATES.WAITING) {
@@ -105,7 +105,7 @@ export class MemeServer {
             socket.broadcast.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.players);
           } else if (
             (game.state === STATES.STARTED ||
-              game.state === STATES.SELECTING ||
+              game.state === STATES.ANSWERS ||
               game.state === STATES.MEMELORD) &&
             player.length
           ) {
@@ -121,14 +121,13 @@ export class MemeServer {
       }
 
       socket.on(MemeServer.ON_LEAVEGAME_LISTENER, async (data, callback) => {
-        const { user, game, roomId } = await this.getUserData(data);
+        const { user, game } = await this.getUserData(data);
 
         if (user) {
           if (game) {
             game.leaveGame(user.username);
             socket.leave(game.id);
             callback();
-            console.log(`[MS] ${user.username} left game ${roomId}`);
 
             this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.players);
           }
@@ -136,13 +135,11 @@ export class MemeServer {
       });
 
       socket.on(MemeServer.ON_STARTGAME_LISTENER, async (data) => {
-        const { game, roomId } = await this.getUserData(data);
+        const { game } = await this.getUserData(data);
 
         if (game) {
           game.initGame();
           emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
-
-          console.log(`[MS] ${roomId}: Game started`);
         }
       });
 
@@ -152,7 +149,6 @@ export class MemeServer {
         if (game) {
           game.setSelectedMeme(data.cardId);
           emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
-          //game.setNextCzar();
         }
       });
 
@@ -160,12 +156,26 @@ export class MemeServer {
         const { user, game } = await this.getUserData(data);
 
         if (game) {
-          console.log(game.state);
           game.setSelectedPlayerCard(user.username, data.cardId);
           callback();
-          console.log(game.state);
-          if (game.state === STATES.SELECTING) {
+          if (game.state === STATES.ANSWERS) {
             emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
+          }
+        }
+      });
+
+      socket.on(MemeServer.ON_WINNERCONFIRM_LISTENER, async (data) => {
+        const { game } = await this.getUserData(data);
+
+        if (game) {
+          const startNewRound = game.setWinningCard(data.cardId);
+          emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
+
+          if (startNewRound) {
+            game.startNewRound();
+            setTimeout(() => {
+              emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
+            }, 10000);
           }
         }
       });

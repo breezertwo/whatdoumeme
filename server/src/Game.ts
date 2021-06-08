@@ -1,7 +1,7 @@
 import deepcopy from 'deepcopy';
 import { deck } from './db/gameData';
 import { MemeCard, RoundData, WhiteCard } from './interfaces/game';
-import { generateUniqueId, popRandom, removeItemAndReturn } from './utils';
+import { generateUniqueId } from './utils';
 
 interface Player {
   username: string;
@@ -20,12 +20,15 @@ export enum STATES {
   COMITTED = 2,
   ANSWERS = 3,
   MEMELORD = 4,
-  SELECTING = 5,
+  WINNER = 5,
 }
 
 export default class Game {
   private readonly _id: string;
   private readonly _host: string;
+
+  private readonly MAX_SCORE: number;
+
   private _players: Player[] = [];
 
   private _STATE: STATES;
@@ -34,12 +37,13 @@ export default class Game {
   private deckCards: WhiteCard[];
 
   private selectedMeme: MemeCard;
-  private currentPlayedCards: WhiteCard[];
+  private currentPlayedCards: (WhiteCard & { owner: string })[];
 
   constructor(host: string) {
     this._STATE = STATES.WAITING;
     this._id = generateUniqueId();
     this._host = host;
+    this.MAX_SCORE = 2;
 
     this.deckMeme = [];
     this.deckCards = [];
@@ -47,7 +51,7 @@ export default class Game {
     this.selectedMeme = undefined;
     this.currentPlayedCards = [];
 
-    this.loadDeck();
+    this.copyDeck();
   }
 
   get state(): number {
@@ -68,6 +72,8 @@ export default class Game {
     // make random player czar
     this._players[Math.floor(Math.random() * this._players.length)].isCzar = true;
     this._STATE = STATES.MEMELORD;
+
+    console.log(`[MS] ${this.id}: Game started`);
   }
 
   public getPlayerByName(playerName: string): Player[] {
@@ -79,24 +85,14 @@ export default class Game {
     //if (this.players.length * amount < this.deck.whiteCards.length) {
     for (let i = 0; i < amount; i++) {
       for (const player of this._players) {
-        player.cards.push(popRandom(this.deckCards));
+        player.cards.push(this.deckCards.popRandom());
       }
     }
     //}
   }
 
-  private loadDeck(): void {
+  private copyDeck(): void {
     const _deck = deepcopy(deck);
-
-    /*
-    _deck.memeCards.forEach((card, index) => {
-      card.cardId = `M${index}`;
-    });
-
-    _deck.whiteCards.forEach((card, index) => {
-      card.cardId = `C${index}`;
-    });
-    */
 
     this.deckMeme = _deck.memeCards;
     this.deckCards = _deck.whiteCards;
@@ -109,7 +105,7 @@ export default class Game {
 
   public joinGame(playerName: string, socketId: string): void {
     const player = this.getPlayerByName(playerName);
-    if (!player.length)
+    if (!player.length) {
       this._players.push({
         username: playerName,
         socketId,
@@ -120,34 +116,27 @@ export default class Game {
         cards: [],
         winCards: [],
       });
-    else if (player.length && player[0].socketId != socketId) {
+      console.log(`[G] ${playerName} joined game ${this.id}.`);
+    } else if (player.length && player[0].socketId != socketId) {
       player[0].socketId = socketId;
+      console.log(`[G] ${player[0].username} rejoined game ${this.id} with socketId ${socketId}.`);
     }
   }
 
   public leaveGame(playerName: string): Player[] {
     this._players = this._players.filter((player) => player.username !== playerName);
+    console.log(`[G] ${playerName} left game ${this.id}`);
+
     return this._players;
   }
 
   public getRound(playerName: string): RoundData {
     const player = this.getPlayerByName(playerName)[0];
 
-    while (player.cards.length < 7) {
-      console.log(`[G] Dealing card to ${playerName}`);
-      player.cards.push(this.getWhiteCard());
-    }
-
-    // Kill it, with fire...
     return {
       serverState: this.state,
       isCzar: player.isCzar,
-      playerCards:
-        this._STATE !== STATES.SELECTING
-          ? player.cards
-          : player.isCzar
-          ? this.currentPlayedCards
-          : [],
+      playerCards: this._STATE !== STATES.ANSWERS ? player.cards : this.currentPlayedCards,
       currentMeme: this.selectedMeme ? this.selectedMeme.name : undefined,
       memeCards: player.isCzar && this._STATE === STATES.MEMELORD ? this.deckMeme : undefined,
     };
@@ -165,27 +154,57 @@ export default class Game {
 
   public setSelectedPlayerCard(playerName: string, cardId: string): void {
     const player = this.getPlayerByName(playerName)[0];
-    const card = removeItemAndReturn(player.cards, (card) => card.cardId === cardId);
+    //const card = removeItemAndReturn(player.cards, (card) => card.cardId === cardId);
+    const card = player.cards.removeAndReturn((card) => card.cardId === cardId);
 
     player.hasCommitted = true;
-    this.currentPlayedCards.push(card);
+    this.currentPlayedCards.push({ ...card, owner: player.username });
 
     console.log(`[G] ${player.username} choose card ${card.cardId}`);
 
     if (this.currentPlayedCards.length === this.players.length - 1) {
       console.log(`[G] ${this._id} round ended`);
-      this._STATE = STATES.SELECTING;
+      this._STATE = STATES.ANSWERS;
     }
   }
 
-  public setNextCzar(): void {
+  public setWinningCard(cardId: string): boolean {
+    this.currentPlayedCards = this.currentPlayedCards.filter((card) => card.cardId === cardId);
+    const winningPlayer = this.getPlayerByName(this.currentPlayedCards[0].owner)[0];
+
+    winningPlayer.score++;
+    winningPlayer.winCards.push(this.selectedMeme);
+
+    if (winningPlayer.score >= this.MAX_SCORE) {
+      console.log(`[G] ${winningPlayer.username} won game ${this._id}`);
+      return false;
+    }
+    return true;
+  }
+
+  public startNewRound(): void {
+    const nextCzar = this._players.cycle((player) => player.isCzar === true);
+
     this._players.forEach((player) => {
       if (player.isCzar) {
-        const nextCzar = this._players.cycle((player) => player.isCzar === true);
         player.isCzar = false;
-        nextCzar.isCzar = true;
-        console.log(`[G] ${nextCzar.username} is next Czar of game`);
+      }
+      player.hasCommitted = false;
+
+      while (player.cards.length < 7) {
+        console.log(`[G] Dealing card to ${player.username}`);
+        player.cards.push(this.getWhiteCard());
       }
     });
+
+    nextCzar.isCzar = true;
+
+    console.log(`[G] ${nextCzar.username} is next Czar of game`);
+
+    this.selectedMeme = undefined;
+    this.currentPlayedCards = [];
+    this._STATE = STATES.MEMELORD;
+
+    console.log(`[G] ${this.id} starting new round in 10 sec`);
   }
 }

@@ -6,7 +6,7 @@ export enum STATES {
   COMITTED = 2,
   ANSWERS = 3,
   MEMELORD = 4,
-  SELECTING = 5,
+  WINNER = 5,
 }
 
 // TODO: Type API
@@ -15,6 +15,6 @@ export interface RoundData {
   isCzar?: boolean;
   playerCards?: any[];
   memeCards?: any[];
-  currentMeme?: any;
+  currentMeme?: string;
   serverState?: number;
 }

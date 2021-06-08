@@ -5,11 +5,9 @@ export interface MemeViewProps {
 }
 
 export const MemeView = ({ currentMeme }: MemeViewProps): JSX.Element => {
-  return (
-    currentMeme && (
-      <div className="imgView">
-        <img src={`public/assets/memes/${currentMeme}`}></img>
-      </div>
-    )
-  );
+  return currentMeme ? (
+    <div className="imgView">
+      <img src={`public/assets/memes/${currentMeme}`}></img>
+    </div>
+  ) : null;
 };

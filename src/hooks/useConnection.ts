@@ -8,11 +8,11 @@ import { RoundData, STATES } from '../interfaces/api';
 const GAME_RECIVE_LISTENER = 'sendGame';
 const NEW_ROUND_LISTENER = 'newRound';
 const GET_PLAYER_LISTENER = 'playerData';
-const MEME_RECEIVE_LISTENER = 'sendMeme';
 
 const LEAVE_GAME_EVENT = 'leaveGame';
 const START_GAME_EVENT = 'startGame';
 const CONFIRM_MEMESELECT_EVENT = 'confirmMeme';
+const CONFIRM_WINNER_EVENT = 'confirmSelectionWinner';
 const CONFIRM_SELECTION_EVENT = 'confirmSelection';
 
 const SOCKET_SERVER_URL = 'http://localhost:3030';
@@ -96,8 +96,11 @@ const useConnection = (roomId: string): SocketConnection => {
   };
 
   const confirmCard = (cardId) => {
+    const EMIT_EVENT =
+      serverState === STATES.ANSWERS ? CONFIRM_WINNER_EVENT : CONFIRM_SELECTION_EVENT;
+
     socketRef.current.emit(
-      CONFIRM_SELECTION_EVENT,
+      EMIT_EVENT,
       {
         senderId: Cookies.get('userName'),
         roomId: Cookies.get('roomId'),

@@ -26,29 +26,34 @@ function generate(): string {
   return rtn;
 }
 
-export function removeItemAndReturn<T>(arr: Array<T>, fn: (value: T, index: number) => unknown): T {
-  const i = arr.findIndex(fn);
-  if (i > -1) {
-    return arr.splice(i, 1)[0];
-  }
-}
-
-export function popRandom<T>(array: Array<T>): T {
-  const i = (Math.random() * array.length) | 0;
-  return array.splice(i, 1)[0];
-}
-
 // Array Extension
 declare global {
   interface Array<T> {
-    cycle(fn: (value: T, index: number) => unknown): T;
+    cycle(fn: (value: T) => unknown): T;
+    removeAndReturn(fn: (value: T) => unknown): T;
+    popRandom(): T;
   }
 }
 
 if (!Array.prototype.cycle) {
-  Array.prototype.cycle = function <T>(fn: (this: T[], value: T, index: number) => unknown) {
+  Array.prototype.cycle = function <T>(fn: (this: T[], value: T) => unknown) {
     const i = this.findIndex(fn);
     if (i === -1) return undefined;
     return this[(i + 1) % this.length];
+  };
+}
+
+if (!Array.prototype.removeAndReturn) {
+  Array.prototype.removeAndReturn = function <T>(fn: (this: T[], value: T) => unknown) {
+    const i = this.findIndex(fn);
+    if (i > -1) return this.splice(i, 1)[0];
+    else return undefined;
+  };
+}
+
+if (!Array.prototype.popRandom) {
+  Array.prototype.popRandom = function () {
+    const i = (Math.random() * this.length) | 0;
+    return this.splice(i, 1)[0];
   };
 }

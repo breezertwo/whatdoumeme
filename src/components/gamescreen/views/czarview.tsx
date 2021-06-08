@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core';
 
 import Cards from '../cards/Cards';
 import LoadingSpinner from '../../common/loadingSpinner';
+import { RoundData } from '../../../interfaces/api';
 
 const useStyles = makeStyles({
   mainContainer: {
@@ -10,11 +11,12 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     flexGrow: 1,
+    maxWidth: '600px',
   },
 });
 
 export interface CzarViewProps {
-  roundData: any;
+  roundData: RoundData;
   onCardClicked: (cardId: string) => void;
   onConfirmClicked: () => void;
 }
@@ -38,7 +40,7 @@ export const CzarView = ({
           />
           <div onClick={onConfirmClicked} className="confirmBtn">
             Confirm Selection
-          </div>{' '}
+          </div>
         </>
       ) : (
         <LoadingSpinner msg={'Wait until czar selects a meme...'} />

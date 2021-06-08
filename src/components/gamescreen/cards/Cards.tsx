@@ -49,18 +49,19 @@ const Cards = ({
   return (
     <div className={classes.root}>
       <GridList className={classes.gridList} cols={5}>
-        {playerCards &&
-          playerCards.map((card, i) => (
-            <TextCard
-              onCardClicked={onCardClickedInner}
-              key={i}
-              cardId={card.cardId}
-              isCzar={isCzar}
-              isShowComitted={isShowComitted}
-              text={card.text ? card.text : card.name}
-              isHighlighted={card.cardId === isHl}
-            />
-          ))}
+        {playerCards
+          ? playerCards.map((card, i) => (
+              <TextCard
+                onCardClicked={onCardClickedInner}
+                key={i}
+                cardId={card.cardId}
+                isCzar={isCzar}
+                isShowComitted={isShowComitted}
+                text={card.text ? card.text : card.name}
+                isHighlighted={card.cardId === isHl}
+              />
+            ))
+          : null}
       </GridList>
     </div>
   );
