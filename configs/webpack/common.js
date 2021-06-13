@@ -1,5 +1,6 @@
 // shared config (dev and prod)
 const { resolve } = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -31,13 +32,6 @@ module.exports = {
         ],
       },
     ],
-  },
-  optimization: {
-    moduleIds: 'deterministic',
-    runtimeChunk: 'single',
-    splitChunks: {
-      chunks: 'all',
-    },
   },
   plugins: [new HtmlWebpackPlugin({ template: 'index.html.ejs' })],
   performance: {

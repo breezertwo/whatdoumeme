@@ -10,6 +10,15 @@ module.exports = merge(commonConfig, {
       'react-dom': '@hot-loader/react-dom',
     },
   },
+  module: {
+    rules: [
+      {
+        test: [/\.jsx?$/, /\.tsx?$/],
+        use: ['babel-loader'],
+        exclude: /node_modules/,
+      },
+    ],
+  },
   entry: [
     'react-hot-loader/patch', // activate HMR for React
     'webpack-dev-server/client?http://localhost:8080', // bundle the client for webpack-dev-server and connect to the provided endpoint
@@ -23,6 +32,9 @@ module.exports = merge(commonConfig, {
   },
   devtool: 'cheap-module-source-map',
   plugins: [
-    new webpack.HotModuleReplacementPlugin(), // enable HMR globally
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('development'),
+    }),
   ],
 });

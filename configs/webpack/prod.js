@@ -1,6 +1,7 @@
 // production config
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 
 const commonConfig = require('./common');
@@ -22,6 +23,8 @@ module.exports = merge(commonConfig, {
   },
   devtool: 'source-map',
   optimization: {
+    moduleIds: 'deterministic',
+    runtimeChunk: 'single',
     splitChunks: {
       cacheGroups: {
         vendor: {
@@ -33,5 +36,10 @@ module.exports = merge(commonConfig, {
       },
     },
   },
-  plugins: [new MiniCssExtractPlugin()],
+  plugins: [
+    new MiniCssExtractPlugin(),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('production'),
+    }),
+  ],
 });

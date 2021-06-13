@@ -4,12 +4,12 @@
   "author": "breezertwo",
   "license": "MIT",
   "scripts": {
-    "build": "yarn run clean-dist && webpack --config=configs/webpack/prod.js",
     "clean-dist": "rimraf dist/*",
     "lint": "eslint './src/**/*.{js,ts,tsx}' --quiet",
-    "start": "yarn run start-dev",
-    "start-dev": "webpack serve --config=configs/webpack/dev.js",
-    "start-prod": "yarn run build && node express.js"
+    "start": "yarn start:dev",
+    "start:dev": "set NODE_ENV=development && webpack serve --config=configs/webpack/dev.js",
+    "build:prod": "set NODE_ENV=production && yarn clean-dist && set NODE_ENV=production && webpack --config=configs/webpack/prod.js",
+    "start:prod": "yarn build:prod && node express.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.13.16",
