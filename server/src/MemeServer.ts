@@ -19,6 +19,7 @@ export class MemeServer {
   private static readonly GAME_RECEIVE_EVENT: string = 'sendGame';
   private static readonly NEW_ROUND_EVENT: string = 'newRound';
   private static readonly GET_PLAYER_EVENT: string = 'playerData';
+  private static readonly GET_ROUNDEND_EVENT: string = 'roundEnd';
 
   private static readonly ON_CONNECTION_LISTENER: string = 'connection';
   private static readonly ON_DSICONNECT_LISTENER: string = 'disconnect';
@@ -180,6 +181,8 @@ export class MemeServer {
             setTimeout(() => {
               emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
             }, 10000);
+          } else {
+            this.io.to(game.id).emit(MemeServer.GET_ROUNDEND_EVENT);
           }
         }
       });

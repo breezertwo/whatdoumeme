@@ -8,6 +8,7 @@ import { RoundData, STATES } from '../interfaces/api';
 const GAME_RECIVE_LISTENER = 'sendGame';
 const NEW_ROUND_LISTENER = 'newRound';
 const GET_PLAYER_LISTENER = 'playerData';
+const GET_ROUNDEND_LISTENER = 'roundEnd';
 
 const LEAVE_GAME_EVENT = 'leaveGame';
 const START_GAME_EVENT = 'startGame';
@@ -65,6 +66,11 @@ const useConnection = (roomId: string): SocketConnection => {
 
     socketRef.current.on(GET_PLAYER_LISTENER, (data) => {
       setPlayersData([...data]);
+    });
+
+    socketRef.current.on(GET_ROUNDEND_LISTENER, () => {
+      Cookies.remove('roomId');
+      history.push(`/`);
     });
   }, []);
 
