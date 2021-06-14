@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import { redditMemeArray } from './reddit';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const ID_LENGTH = 6;
@@ -29,17 +29,22 @@ function generate(): string {
 }
 
 export const fetchRandomMeme = async (): Promise<string> => {
-  const body = await (await fetch(`https://reddit.com/r/meme/top/.json`)).json();
-  const i = (Math.random() * body.data.children.length) | 0;
-  const url = body.data.children[i].data.url;
+  let url = redditMemeArray.random().data.url;
+
+  while (url.includes('/gallery/')) {
+    url = redditMemeArray.random().data.url;
+  }
+
   return url;
 };
+
 // Array Extension
 declare global {
   interface Array<T> {
     cycle(fn: (value: T) => unknown): T;
     removeAndReturn(fn: (value: T) => unknown): T;
     popRandom(): T;
+    random(): T;
   }
 }
 
@@ -63,5 +68,11 @@ if (!Array.prototype.popRandom) {
   Array.prototype.popRandom = function () {
     const i = (Math.random() * this.length) | 0;
     return this.splice(i, 1)[0];
+  };
+}
+
+if (!Array.prototype.random) {
+  Array.prototype.random = function () {
+    return this[Math.floor(Math.random() * this.length)];
   };
 }

@@ -9,8 +9,7 @@ import cors from 'cors';
 
 import User, { IUser } from './db/userSchema';
 import Game, { STATES } from './Game';
-import { fetchRandomMeme } from './utils';
-
+import * as Utils from './utils';
 interface UserData {
   user: IUser;
   game: Game;
@@ -50,6 +49,8 @@ export class MemeServer {
     this.initDb();
     this.initSocket();
     this.listen();
+
+    Utils.initRedditFetch();
   }
 
   get app(): express.Application {
@@ -159,9 +160,10 @@ export class MemeServer {
         if (game) {
           game.setSelectedPlayerCard(user.username, data.cardId);
           if (game.state === STATES.ANSWERS) {
+            callback('');
             emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
           } else {
-            callback(await fetchRandomMeme());
+            callback(await Utils.fetchRandomMeme());
           }
         }
       });

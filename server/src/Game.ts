@@ -1,7 +1,7 @@
 import deepcopy from 'deepcopy';
 import { deck } from './db/gameData';
 import { MemeCard, RoundData, WhiteCard } from './interfaces/game';
-import { generateUniqueId } from './utils';
+import * as Utils from './utils';
 
 interface Player {
   username: string;
@@ -41,7 +41,7 @@ export default class Game {
 
   constructor(host: string) {
     this._STATE = STATES.WAITING;
-    this._id = generateUniqueId();
+    this._id = Utils.generateUniqueId();
     this._host = host;
     this.MAX_SCORE = 2;
 

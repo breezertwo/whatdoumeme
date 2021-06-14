@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core';
 
 interface LoadingProps {
-  msg: string;
+  msg?: string;
 }
 
 const useStyles = makeStyles({
