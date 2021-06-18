@@ -12,7 +12,7 @@ async function fetchReddit(): Promise<void> {
 
 export function initRedditFetch(): void {
   fetchReddit(); // await ignored, cause I don't need to wait for the fetch to fullfill immediately.
-  cron.schedule('*/5 * * * *', async () => {
+  cron.schedule('*/15 * * * *', async () => {
     console.log('[S] ---------------------');
     console.log('[S] Running Cron Job - REDDIT');
     await fetchReddit();

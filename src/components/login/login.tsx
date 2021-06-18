@@ -6,7 +6,6 @@ import { makeStyles } from '@material-ui/core';
 
 export const useLoginStyles = makeStyles({
   loginContainer: {
-    alignSelf: 'center',
     display: 'flex',
     flexDirection: 'column',
     maxWidth: 500,

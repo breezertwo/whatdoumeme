@@ -3,8 +3,8 @@ import { hot } from 'react-hot-loader';
 import { Switch, Route, MemoryRouter } from 'react-router-dom';
 
 import './../assets/scss/App.scss';
+import Home from './gamescreen/mainView';
 import Login from './login/login';
-import Home from './gamescreen/home';
 
 const App = (): JSX.Element => {
   return (

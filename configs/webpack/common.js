@@ -1,6 +1,5 @@
 // shared config (dev and prod)
 const { resolve } = require('path');
-const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -16,7 +15,7 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.(scss|sass)$/,
+        test: /\.(s[ac]ss|css)$/,
         use: ['style-loader', 'css-loader', 'sass-loader'],
       },
       {

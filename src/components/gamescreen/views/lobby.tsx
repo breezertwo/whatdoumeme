@@ -47,7 +47,7 @@ export interface LobbyProps {
   onStartClick: () => void;
 }
 
-const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.Element => {
+export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.Element => {
   const [isHost, setIsHost] = useState(false);
   const classes = useStyles();
 
@@ -91,5 +91,3 @@ const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.Element
     </div>
   );
 };
-
-export default Lobby;
