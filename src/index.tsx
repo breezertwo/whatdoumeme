@@ -1,22 +1,12 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core';
+import { ThemeProvider } from '@material-ui/core';
 
 import App from './components/App';
-
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      main: '#31a24c',
-    },
-    secondary: {
-      main: '#2e7031',
-    },
-  },
-});
+import { mainTheme } from './components/gamescreen/views/styles';
 
 ReactDOM.render(
-  <ThemeProvider theme={theme}>
+  <ThemeProvider theme={mainTheme}>
     <App />
   </ThemeProvider>,
   document.getElementById('root')

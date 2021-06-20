@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import { CustomButton } from '../gamescreen/views/subviews';
 import { useLoginStyles } from './login';
 
 const JoinGame = (): JSX.Element => {
@@ -21,9 +22,9 @@ const JoinGame = (): JSX.Element => {
 
   return (
     <div className={classes.loginContainer}>
-      <Link to={`room/:create`} className="enterRoomBtn">
-        Create game
-      </Link>
+      <CustomButton>
+        <Link to={`room/:create`}>Create game</Link>
+      </CustomButton>
       <input
         type="text"
         placeholder="Room"
@@ -31,9 +32,9 @@ const JoinGame = (): JSX.Element => {
         onChange={handleRoomNameChange}
         className={classes.textInput}
       />
-      <Link to={`room/${roomName}`} className="enterRoomBtn">
-        Join game
-      </Link>
+      <CustomButton>
+        <Link to={`room/${roomName}`}>Join game</Link>
+      </CustomButton>
     </div>
   );
 };

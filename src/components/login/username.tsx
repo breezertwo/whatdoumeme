@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { CustomButton } from '../gamescreen/views/subviews';
 import { useLoginStyles } from './login';
 
 const Username = (): JSX.Element => {
@@ -26,9 +27,7 @@ const Username = (): JSX.Element => {
         onChange={handleUserameChange}
         className={classes.textInput}
       />
-      <div onClick={onClick} className="enterRoomBtn">
-        Set username
-      </div>
+      <CustomButton onClick={onClick}>Set username</CustomButton>
     </div>
   );
 };

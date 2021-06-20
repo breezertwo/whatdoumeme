@@ -39,8 +39,9 @@ export const GameView = ({
         isShowComitted={czarIsSelecting}
       />
       <ButtonContainer
-        active={!czarIsSelecting || (czarIsSelecting && roundData.isCzar)}
-        onConfirmClicked={onConfirmClickedLocal}
+        onConfirmClicked={
+          !czarIsSelecting || (czarIsSelecting && roundData.isCzar) ? onConfirmClickedLocal : null
+        }
         onLeaveClick={onLeaveClick}
       />
     </div>

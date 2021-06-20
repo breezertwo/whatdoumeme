@@ -56,6 +56,7 @@ const Home = (): JSX.Element => {
             roundData={roundData}
             onConfirmClicked={() => confirmMeme(selectedCardId)}
             onCardClicked={onCardClicked}
+            onLeaveClick={leaveGame}
           />
         );
       case STATES.COMITTED:

@@ -4,6 +4,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import PersonIcon from '@material-ui/icons/Person';
 import Cookies from 'js-cookie';
+import { Button } from '@material-ui/core';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -26,17 +27,22 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: '#f0c348',
       margin: '5px 0;',
     },
-    listContainer: {
+    listItemContainer: {
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'space-between',
       flexGrow: 1,
     },
     divContainerEnd: {
-      justifyContent: 'flex-end',
+      display: 'flex',
+      justifyContent: 'space-between',
     },
     spacing: {
-      margin: '10px 10px 10px 0',
+      margin: 5,
+    },
+    button: {
+      margin: 5,
+      flexGrow: 1,
     },
   })
 );
@@ -51,9 +57,6 @@ export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.
   const [isHost, setIsHost] = useState(false);
   const classes = useStyles();
 
-  const combinedButtonContainerStyleClasses = `${classes.listContainer} ${classes.divContainerEnd}`;
-  const combinedButtonStyleClasses = `grnBtn ${classes.spacing}`;
-
   useEffect(() => {
     if (players.length > 0) {
       const player = players.filter((player) => player.username === Cookies.get('userName'))[0];
@@ -66,22 +69,32 @@ export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.
   return (
     <div className={classes.root}>
       <div className={classes.header}>
-        <h1>Lobby: {Cookies.get('roomId')}</h1>
-        <div className={combinedButtonContainerStyleClasses}>
+        <div className={classes.spacing}>
+          <h2>Lobby: {Cookies.get('roomId')}</h2>
+        </div>
+        <div className={classes.divContainerEnd}>
           {isHost && (
-            <div className={combinedButtonStyleClasses} onClick={onStartClick}>
+            <Button
+              variant="contained"
+              className={classes.button}
+              color="primary"
+              onClick={onStartClick}>
               Start
-            </div>
+            </Button>
           )}
-          <div className="cnclBtn" onClick={onLeaveClick}>
+          <Button
+            variant="contained"
+            className={classes.button}
+            color="secondary"
+            onClick={onLeaveClick}>
             Leave
-          </div>
+          </Button>
         </div>
       </div>
-      <List component="nav">
+      <List className={classes.spacing} component="nav">
         {players.map((player, i) => (
           <ListItem key={i} className={player.host ? classes.itemHost : classes.item}>
-            <div className={classes.listContainer}>
+            <div className={classes.listItemContainer}>
               {player.username}
               {player.host ? <PersonIcon /> : null}
             </div>

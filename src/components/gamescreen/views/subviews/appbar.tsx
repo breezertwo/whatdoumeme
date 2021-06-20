@@ -23,7 +23,7 @@ export const TabBar = ({ serverState, handleChange }: TabBarProps): JSX.Element 
   return (
     serverState !== STATES.WAITING && (
       <AppBar position="static">
-        <Tabs value={value} onChange={localHandleChange} aria-label="simple tabs example">
+        <Tabs value={value} onChange={localHandleChange}>
           <Tab label="Home" {...tabProps(0)} />
           <Tab label="Info" {...tabProps(1)} />
           <Tab label="Stats" {...tabProps(2)} />

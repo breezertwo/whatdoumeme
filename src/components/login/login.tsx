@@ -11,7 +11,7 @@ export const useLoginStyles = makeStyles({
     maxWidth: 500,
   },
   textInput: {
-    padding: '24px 12px',
+    padding: '18px 12px',
     borderRadius: 7,
     fontSize: 24,
     margin: '30px 0 10px 0',

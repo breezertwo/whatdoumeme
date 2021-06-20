@@ -4,17 +4,20 @@ import Cards from '../cards/Cards';
 import LoadingSpinner from '../../common/loadingSpinner';
 import { RoundData } from '../../../interfaces/api';
 import { useMainContianerStyles } from './styles/sharedStyles';
+import { ButtonContainer } from './subviews';
 
 export interface CzarViewProps {
   roundData: RoundData;
   onCardClicked: (cardId: string) => void;
   onConfirmClicked: () => void;
+  onLeaveClick: () => void;
 }
 
 export const CzarView = ({
   roundData,
   onConfirmClicked,
   onCardClicked,
+  onLeaveClick,
 }: CzarViewProps): JSX.Element => {
   const classes = useMainContianerStyles();
 
@@ -28,9 +31,7 @@ export const CzarView = ({
             playerCards={roundData.memeCards}
             isCzar={roundData.isCzar}
           />
-          <div onClick={onConfirmClicked} className="confirmBtn">
-            Confirm Selection
-          </div>
+          <ButtonContainer onConfirmClicked={onConfirmClicked} onLeaveClick={onLeaveClick} />
         </>
       ) : (
         <LoadingSpinner msg={'Wait until czar selects a meme...'} />
