@@ -11,6 +11,7 @@ export interface CustomButtonProps {
 const useStyles = makeStyles<Theme, CustomButtonProps>(() =>
   createStyles({
     root: {
+      flexGrow: 1,
       background: '#31a24c',
       fontWeight: 600,
       textAlign: 'center',

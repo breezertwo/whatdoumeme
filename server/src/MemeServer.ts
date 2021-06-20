@@ -134,6 +134,10 @@ export class MemeServer {
             callback();
 
             this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.players);
+
+            if (game.players.length === 0) {
+              this.activeGames.delete(game.id);
+            }
           }
         }
       });

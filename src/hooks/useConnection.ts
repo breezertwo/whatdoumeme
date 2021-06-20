@@ -95,28 +95,32 @@ const useConnection = (roomId: string): SocketConnection => {
   };
 
   const confirmMeme = (cardId) => {
-    socketRef.current.emit(CONFIRM_MEMESELECT_EVENT, {
-      roomId: Cookies.get('roomId'),
-      cardId,
-    });
+    if (cardId) {
+      socketRef.current.emit(CONFIRM_MEMESELECT_EVENT, {
+        roomId: Cookies.get('roomId'),
+        cardId,
+      });
+    }
   };
 
   const confirmCard = (cardId) => {
-    const EMIT_EVENT =
-      serverState === STATES.ANSWERS ? CONFIRM_WINNER_EVENT : CONFIRM_SELECTION_EVENT;
+    if (cardId) {
+      const EMIT_EVENT =
+        serverState === STATES.ANSWERS ? CONFIRM_WINNER_EVENT : CONFIRM_SELECTION_EVENT;
 
-    socketRef.current.emit(
-      EMIT_EVENT,
-      {
-        senderId: Cookies.get('userName'),
-        roomId: Cookies.get('roomId'),
-        cardId,
-      },
-      (data) => {
-        setRoundData({ ...roundData, randomMeme: data });
-        setServerState(STATES.COMITTED);
-      }
-    );
+      socketRef.current.emit(
+        EMIT_EVENT,
+        {
+          senderId: Cookies.get('userName'),
+          roomId: Cookies.get('roomId'),
+          cardId,
+        },
+        (data) => {
+          setRoundData({ ...roundData, randomMeme: data });
+          setServerState(STATES.COMITTED);
+        }
+      );
+    }
   };
 
   return {

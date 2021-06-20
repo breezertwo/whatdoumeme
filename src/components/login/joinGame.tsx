@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { CustomButton } from '../gamescreen/views/subviews';
 import { useLoginStyles } from './login';
 
@@ -20,11 +20,16 @@ const JoinGame = (): JSX.Element => {
     }
   }, []);
 
+  const createRoom = () => {
+    history.push('room/:create');
+  };
+
+  const joinRoom = () => {
+    history.push(`room/${roomName}`);
+  };
   return (
     <div className={classes.loginContainer}>
-      <CustomButton>
-        <Link to={`room/:create`}>Create game</Link>
-      </CustomButton>
+      <CustomButton onClick={createRoom}>Create game</CustomButton>
       <input
         type="text"
         placeholder="Room"
@@ -32,9 +37,7 @@ const JoinGame = (): JSX.Element => {
         onChange={handleRoomNameChange}
         className={classes.textInput}
       />
-      <CustomButton>
-        <Link to={`room/${roomName}`}>Join game</Link>
-      </CustomButton>
+      <CustomButton onClick={joinRoom}>Create game</CustomButton>
     </div>
   );
 };
