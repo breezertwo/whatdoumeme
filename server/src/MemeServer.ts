@@ -178,10 +178,10 @@ export class MemeServer {
         const { game } = await this.getUserData(data);
 
         if (game) {
-          const startNewRound = game.setWinningCard(data.cardId);
-          emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
+          const result = game.setWinningCard(data.cardId);
+          emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT, { winner: result.winner });
 
-          if (startNewRound) {
+          if (result.hasRoundEnded) {
             game.startNewRound();
             setTimeout(() => {
               emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);

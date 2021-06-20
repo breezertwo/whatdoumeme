@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 
 import useConnection from '../../hooks/useConnection';
 import LoadingSpinner from '../common/loadingSpinner';
-import { CzarView, GameView, CommittedView, Lobby } from './views';
+import { CzarView, GameView, CommittedView, Lobby, WinnerView } from './views';
 import { TabBar, TabPanel } from './views/subviews';
 
 import { STATES } from '../../interfaces/api';
@@ -59,6 +59,8 @@ const Home = (): JSX.Element => {
             onLeaveClick={leaveGame}
           />
         );
+      case STATES.WINNER:
+        return <WinnerView roundData={roundData} />;
       case STATES.COMITTED:
         return <CommittedView memeURL={roundData.randomMeme} />;
       case STATES.LOADING:

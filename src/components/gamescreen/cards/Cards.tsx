@@ -29,7 +29,7 @@ export interface CardsProps {
   playerCards: Card[];
   isCzar?: boolean;
   isShowComitted?: boolean;
-  onCardClicked: (id: string) => void;
+  onCardClicked?: (id: string) => void;
 }
 
 const Cards = ({

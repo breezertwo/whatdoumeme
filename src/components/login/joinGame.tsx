@@ -37,7 +37,7 @@ const JoinGame = (): JSX.Element => {
         onChange={handleRoomNameChange}
         className={classes.textInput}
       />
-      <CustomButton onClick={joinRoom}>Create game</CustomButton>
+      <CustomButton onClick={joinRoom}>Join Game</CustomButton>
     </div>
   );
 };

@@ -14,6 +14,11 @@ interface Player {
   winCards: MemeCard[];
 }
 
+interface RoundResult {
+  hasRoundEnded: boolean;
+  winner: string;
+}
+
 export enum STATES {
   WAITING = 0,
   STARTED = 1,
@@ -136,7 +141,10 @@ export default class Game {
     return {
       serverState: this.state,
       isCzar: player.isCzar,
-      playerCards: this._STATE !== STATES.ANSWERS ? player.cards : this.currentPlayedCards,
+      playerCards:
+        this._STATE === STATES.ANSWERS || this._STATE === STATES.WINNER
+          ? this.currentPlayedCards
+          : player.cards,
       currentMeme: this.selectedMeme ? this.selectedMeme.name : undefined,
       memeCards: player.isCzar && this._STATE === STATES.MEMELORD ? this.deckMeme : undefined,
     };
@@ -168,18 +176,20 @@ export default class Game {
     }
   }
 
-  public setWinningCard(cardId: string): boolean {
+  public setWinningCard(cardId: string): RoundResult {
     this.currentPlayedCards = this.currentPlayedCards.filter((card) => card.cardId === cardId);
     const winningPlayer = this.getPlayerByName(this.currentPlayedCards[0].owner)[0];
 
     winningPlayer.score++;
     winningPlayer.winCards.push(this.selectedMeme);
 
+    this._STATE = STATES.WINNER;
+
     if (winningPlayer.score >= this.MAX_SCORE) {
       console.log(`[G] ${winningPlayer.username} won game ${this._id}`);
-      return false;
+      return { hasRoundEnded: false, winner: winningPlayer.username };
     }
-    return true;
+    return { hasRoundEnded: true, winner: winningPlayer.username };
   }
 
   public startNewRound(): void {

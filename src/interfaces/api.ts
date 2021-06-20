@@ -18,4 +18,5 @@ export interface RoundData {
   currentMeme?: string;
   serverState?: number;
   randomMeme?: string;
+  winner?: string;
 }
