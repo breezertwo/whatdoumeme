@@ -10,11 +10,13 @@ async function fetchReddit(): Promise<void> {
   redditMemeArray = body.data.children;
 }
 
-export function initRedditFetch(): void {
+export function initRedditFetch(runCron: boolean): void {
   fetchReddit(); // await ignored, cause I don't need to wait for the fetch to fullfill immediately.
-  cron.schedule('*/15 * * * *', async () => {
-    console.log('[S] ---------------------');
-    console.log('[S] Running Cron Job - REDDIT');
-    await fetchReddit();
-  });
+  if (runCron) {
+    cron.schedule('*/15 * * * *', async () => {
+      console.log('[S] ---------------------');
+      console.log('[S] Running Cron Job - REDDIT');
+      await fetchReddit();
+    });
+  }
 }

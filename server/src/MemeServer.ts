@@ -51,7 +51,7 @@ export class MemeServer {
     this.initSocket();
     this.listen();
 
-    Utils.initRedditFetch();
+    Utils.initRedditFetch(true);
   }
 
   get app(): express.Application {
@@ -103,6 +103,7 @@ export class MemeServer {
           socket.join(game.id);
 
           const player = game.getPlayerByName(username);
+          //TODO: Clean this mess up
           if (game.state === STATES.WAITING) {
             socket.emit(MemeServer.GAME_RECEIVE_EVENT, game);
             socket.broadcast.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.players);
