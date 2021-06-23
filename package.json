@@ -2,7 +2,7 @@
   "name": "whatdoumeme",
   "version": "1.0.0",
   "author": "breezertwo",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "scripts": {
     "clean-dist": "rimraf dist/*",
     "lint": "eslint './src/**/*.{js,ts,tsx}' --quiet",

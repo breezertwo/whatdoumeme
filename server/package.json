@@ -1,10 +1,10 @@
 {
-  "name": "whatdoumemeServer",
+  "name": "whatdoumeme-server",
   "version": "1.0.0",
   "description": "Server for whatdoumeme",
-  "main": "index.js",
+  "main": ".src/server.ts",
   "author": "breezertwo",
-  "license": "",
+  "license": "GPL-3.0-only",
   "scripts": {
     "start:dev": "nodemon --watch './src/**/*.ts' --exec ts-node ./src/server.ts",
     "start:debug": "nodemon --watch './src/**/*.ts' --exec node --inspect-brk -r ts-node/register ./src/server.ts",
