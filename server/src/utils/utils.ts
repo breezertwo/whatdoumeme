@@ -1,4 +1,5 @@
-import { redditMemeArray } from './reddit';
+import { Db } from 'mongodb';
+import { RedditMeme } from '../db';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const ID_LENGTH = 6;
@@ -28,14 +29,30 @@ function generate(): string {
   return rtn;
 }
 
-export const fetchRandomMeme = async (): Promise<string> => {
-  let url = redditMemeArray.random().data.url;
+export const getRandomRedditMeme = async (db: Db): Promise<string> => {
+  const randomMeme = (
+    await db
+      .collection('redditPosts')
+      .aggregate<RedditMeme>([{ $sample: { size: 1 } }])
+      .toArray()
+  )[0];
 
-  while (url.includes('/gallery/')) {
-    url = redditMemeArray.random().data.url;
+  return randomMeme.url;
+};
+
+export const getRandomElementsNonDestructive = <T>(arr: Array<T>, n: number): Array<T> => {
+  // src: https://stackoverflow.com/a/19270021/9088626
+  let len = arr.length;
+  const result = new Array<T>(n),
+    taken = new Array(len);
+
+  if (n > len) throw new RangeError('getRandom: more elements taken than available');
+  while (n--) {
+    const x = Math.floor(Math.random() * len);
+    result[n] = arr[x in taken ? taken[x] : x];
+    taken[x] = --len in taken ? taken[len] : len;
   }
-
-  return url;
+  return result;
 };
 
 // Array Extension

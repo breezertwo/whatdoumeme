@@ -2,16 +2,16 @@
 
 import express from 'express';
 import cookie from 'cookie';
-import { connect } from 'mongoose';
 import { Server, Socket } from 'socket.io';
 import { createServer, Server as HttpServer } from 'http';
 import cors from 'cors';
+import { Db } from 'mongodb';
 
-import User, { IUser } from './db/userSchema';
 import Game, { STATES } from './Game';
 import * as Utils from './utils';
+import { MongoDb, User } from './db';
 interface UserData {
-  user: IUser;
+  user: User;
   game: Game;
   roomId: string;
 }
@@ -36,6 +36,7 @@ export class MemeServer {
   private _port: string | number;
 
   private io: Server;
+  private db: Db;
 
   private activeGames: Map<string, Game>;
   constructor() {
@@ -50,8 +51,6 @@ export class MemeServer {
     this.initDb();
     this.initSocket();
     this.listen();
-
-    Utils.initRedditFetch(true);
   }
 
   get app(): express.Application {
@@ -63,16 +62,9 @@ export class MemeServer {
   }
 
   private async initDb(): Promise<void> {
-    await connect(
-      'mongodb://localhost:27017/whatdoumeme',
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      },
-      () => {
-        console.log('[DB] Connection established');
-      }
-    );
+    const mongo = new MongoDb();
+    await mongo.connect();
+    this.db = mongo.getDb();
   }
 
   private listen(): void {
@@ -169,7 +161,7 @@ export class MemeServer {
             callback('');
             emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
           } else {
-            callback(await Utils.fetchRandomMeme());
+            callback(await Utils.getRandomRedditMeme(this.db));
           }
         }
       });
@@ -218,13 +210,14 @@ export class MemeServer {
   }
 
   // Just a barebones MonogoDB Test for potential user data storage in future
-  private async getUser(username: string): Promise<IUser> {
-    let user = await User.findOne({ username }).exec();
-    if (user === null) {
-      const newUser = new User({
+  private async getUser(username: string): Promise<User> {
+    const coll = this.db.collection('users');
+    let user = await coll.findOne<User>({ username });
+    if (!user) {
+      const newUser = {
         username,
-      });
-      user = await newUser.save();
+      };
+      user = (await coll.insert(newUser)).ops[0];
     }
     return user;
   }

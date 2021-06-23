@@ -1,5 +1,5 @@
 import deepcopy from 'deepcopy';
-import { deck } from './db/gameData';
+import { deck } from './db';
 import { MemeCard, RoundData, WhiteCard } from './interfaces/game';
 import * as Utils from './utils';
 
@@ -146,7 +146,10 @@ export default class Game {
           ? this.currentPlayedCards
           : player.cards,
       currentMeme: this.selectedMeme ? this.selectedMeme.name : undefined,
-      memeCards: player.isCzar && this._STATE === STATES.MEMELORD ? this.deckMeme : undefined,
+      memeCards:
+        player.isCzar && this._STATE === STATES.MEMELORD
+          ? Utils.getRandomElementsNonDestructive(this.deckMeme, 5)
+          : undefined,
     };
   }
 
