@@ -21,4 +21,5 @@ export interface RoundData {
   playerCards: WhiteCard[];
   memeCards: MemeCard[] | undefined;
   currentMeme: string | undefined;
+  currentCzar: string;
 }

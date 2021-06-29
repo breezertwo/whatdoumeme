@@ -3,12 +3,15 @@ import { deck } from './db';
 import { MemeCard, RoundData, WhiteCard } from './interfaces/game';
 import * as Utils from './utils';
 
-interface Player {
+interface BasePlayer {
   username: string;
-  socketId: string;
-  score: number;
-  hasCommitted: boolean;
   host: boolean;
+  score: number;
+}
+
+interface Player extends BasePlayer {
+  socketId: string;
+  hasCommitted: boolean;
   isCzar: boolean;
   cards: WhiteCard[];
   winCards: MemeCard[];
@@ -43,6 +46,7 @@ export default class Game {
 
   private selectedMeme: MemeCard;
   private currentPlayedCards: (WhiteCard & { owner: string })[];
+  private currentCzar: string;
 
   constructor(host: string) {
     this._STATE = STATES.WAITING;
@@ -75,7 +79,9 @@ export default class Game {
     this.shuffleToPlayer(7);
 
     // make random player czar
-    this._players[Math.floor(Math.random() * this._players.length)].isCzar = true;
+    const czar = this._players.random();
+    czar.isCzar = true;
+    this.currentCzar = czar.username;
     this._STATE = STATES.MEMELORD;
 
     console.log(`[MS] ${this.id}: Game started`);
@@ -146,6 +152,7 @@ export default class Game {
           ? this.currentPlayedCards
           : player.cards,
       currentMeme: this.selectedMeme ? this.selectedMeme.name : undefined,
+      currentCzar: this.currentCzar,
       memeCards:
         player.isCzar && this._STATE === STATES.MEMELORD
           ? Utils.getRandomElementsNonDestructive(this.deckMeme, 5)
@@ -211,13 +218,23 @@ export default class Game {
     });
 
     nextCzar.isCzar = true;
+    this.currentCzar = nextCzar.username;
 
-    console.log(`[G] ${nextCzar.username} is next Czar of game`);
+    console.log(`[G] ${this.currentCzar} is next Czar of game`);
 
     this.selectedMeme = undefined;
     this.currentPlayedCards = [];
     this._STATE = STATES.MEMELORD;
 
     console.log(`[G] ${this.id} starting new round in 10 sec`);
+  }
+
+  public getStrippedPlayerData(): BasePlayer[] {
+    const strippedPlayers = [];
+    for (const player of this._players) {
+      const { username, score, host } = player;
+      strippedPlayers.push({ username, score, host });
+    }
+    return strippedPlayers;
   }
 }

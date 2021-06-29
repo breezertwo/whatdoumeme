@@ -35,7 +35,7 @@ const TextCard = (props: CardProps): JSX.Element => {
     <Card className={classes.card} variant="outlined" onClick={() => onCardClicked(cardId)}>
       <CardContent>
         {isCzar ? (
-          <img src={`public/assets/memes/${text}`} alt="It's a meme" />
+          <img src={`assets/memes/${text}`} alt="It's a meme" />
         ) : (
           <Typography variant="body2" component="p">
             {text}

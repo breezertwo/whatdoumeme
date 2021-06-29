@@ -34,7 +34,7 @@ export const CzarView = ({
           <ButtonContainer onConfirmClicked={onConfirmClicked} onLeaveClick={onLeaveClick} />
         </>
       ) : (
-        <LoadingSpinner msg={'Wait until czar selects a meme...'} />
+        <LoadingSpinner msg={`Wait until czar "${roundData.currentCzar}" selects a meme...`} />
       )}
     </div>
   );

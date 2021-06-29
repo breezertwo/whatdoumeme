@@ -8,8 +8,9 @@
     "lint": "eslint './src/**/*.{js,ts,tsx}' --quiet",
     "start": "yarn start:dev",
     "start:dev": "set NODE_ENV=development && webpack serve --config=configs/webpack/dev.js",
-    "build:prod": "yarn clean-dist && set NODE_ENV=production && webpack --config=configs/webpack/prod.js",
-    "start:prod": "yarn build:prod && node express.js"
+    "build:prod": "yarn clean-dist && set NODE_ENV=production && webpack --config=configs/webpack/prod.js && yarn post-prod",
+    "start:prod": "yarn build:prod && node express.js",
+    "post-prod": "cpx \"dist/*\" server/public"
   },
   "devDependencies": {
     "@babel/cli": "^7.13.16",
@@ -28,6 +29,7 @@
     "@typescript-eslint/parser": "^4.22.0",
     "babel-loader": "^8.2.2",
     "copy-webpack-plugin": "^8.1.1",
+    "cpx": "^1.5.0",
     "create-react-class": "^15.7.0",
     "css-loader": "^5.2.4",
     "eslint": "^7.25.0",

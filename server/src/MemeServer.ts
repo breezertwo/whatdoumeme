@@ -1,6 +1,7 @@
 //TODO: Whole API is vulnerable for changed front end data. OK for playing with friends. If ever released as stand alone website: FIX!
 
 import express from 'express';
+import path from 'path';
 import cookie from 'cookie';
 import { Server, Socket } from 'socket.io';
 import { createServer, Server as HttpServer } from 'http';
@@ -45,6 +46,8 @@ export class MemeServer {
     this._app.use(cors());
     this._app.options('*', cors());
     this._server = createServer(this._app);
+
+    this._app.use(express.static(path.join(__dirname, '../public')));
 
     this.activeGames = new Map();
 
@@ -98,7 +101,9 @@ export class MemeServer {
           //TODO: Clean this mess up
           if (game.state === STATES.WAITING) {
             socket.emit(MemeServer.GAME_RECEIVE_EVENT, game);
-            socket.broadcast.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.players);
+            socket.broadcast
+              .to(game.id)
+              .emit(MemeServer.GET_PLAYER_EVENT, game.getStrippedPlayerData());
           } else if (
             (game.state === STATES.STARTED ||
               game.state === STATES.ANSWERS ||
@@ -172,6 +177,7 @@ export class MemeServer {
         if (game) {
           const result = game.setWinningCard(data.cardId);
           emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT, { winner: result.winner });
+          this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getStrippedPlayerData());
 
           if (result.hasRoundEnded) {
             game.startNewRound();
