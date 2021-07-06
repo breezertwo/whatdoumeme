@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { Deck } from '../interfaces/game';
 
-const rawdata = fs.readFileSync('tools/deck.json');
+const rawdata = fs.readFileSync('deck.json');
 export const deck: Deck = JSON.parse(rawdata.toString());
 
 /*

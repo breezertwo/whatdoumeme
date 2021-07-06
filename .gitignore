@@ -1,8 +1,10 @@
 .idea/
 dist/
+outDir/
 node_modules/
-src/**/*.jsx
-public/
 
-server/tools/*
-!server/tools/deckIntake.js
+packages/client/assets/
+packages/server/tools/*
+!packages/server/tools/deckIntake.js
+
+src/**/*.jsx

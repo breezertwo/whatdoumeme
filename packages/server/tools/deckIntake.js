@@ -31,10 +31,14 @@ fs.createReadStream('cardsRawData.csv')
     const fileDir = fs.readdirSync(imgPath);
 
     fileDir.forEach((filename, i) => {
-      const newFileName = `meme${i}${path.extname(filename)}`;
+      if (filename.match(/.(jpg|jpeg|png|gif)$/i)) {
+        const newFileName = `meme${i}${path.extname(filename)}`;
 
-      fs.renameSync(imgPath + filename, convImgPath + newFileName);
-      memesArray.push({ name: newFileName, cardId: `M${i}` });
+        fs.renameSync(imgPath + filename, convImgPath + newFileName);
+        memesArray.push({ name: newFileName, cardId: `M${i}` });
+      } else {
+        console.log(`${filename} is not an image`);
+      }
     });
 
     emptyDeck.whiteCards = cardsArray;
@@ -42,6 +46,6 @@ fs.createReadStream('cardsRawData.csv')
 
     const data = JSON.stringify(emptyDeck);
 
-    console.log('CSV and IMGs successfully processed');
     fs.writeFileSync('deck.json', data);
+    console.log('CSV and IMGs successfully processed');
   });

@@ -47,7 +47,7 @@ export class MemeServer {
     this._app.options('*', cors());
     this._server = createServer(this._app);
 
-    this._app.use(express.static(path.join(__dirname, '../public')));
+    this._app.use(express.static(path.join(__dirname, 'public')));
 
     this.activeGames = new Map();
 
