@@ -7,6 +7,7 @@ import { CzarView, GameView, CommittedView, Lobby, WinnerView } from './views';
 import { TabBar, TabPanel } from './views/subviews';
 
 import { STATES } from '../../interfaces/api';
+import { ScoreBoard } from '../scoreboard/scoreBoard';
 
 interface ParamTypes {
   roomId: string;
@@ -17,15 +18,8 @@ const Home = (): JSX.Element => {
   const [value, setValue] = React.useState(0);
   const { roomId } = useParams<ParamTypes>();
 
-  const {
-    roundData,
-    playersData,
-    serverState,
-    startGame,
-    leaveGame,
-    confirmCard,
-    confirmMeme,
-  } = useConnection(roomId);
+  const { roundData, playersData, serverState, startGame, leaveGame, confirmCard, confirmMeme } =
+    useConnection(roomId);
 
   const onCardClicked = (id: string) => {
     console.log(id);
@@ -77,7 +71,7 @@ const Home = (): JSX.Element => {
         {getViewByState()}
       </TabPanel>
       <TabPanel value={value} index={1}>
-        Item Two
+        <ScoreBoard playerData={playersData} />
       </TabPanel>
       <TabPanel value={value} index={2}>
         Item Three

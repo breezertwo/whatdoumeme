@@ -7,12 +7,12 @@ interface BasePlayer {
   username: string;
   host: boolean;
   score: number;
+  isCzar: boolean;
 }
 
 interface Player extends BasePlayer {
   socketId: string;
   hasCommitted: boolean;
-  isCzar: boolean;
   cards: WhiteCard[];
   winCards: MemeCard[];
 }
@@ -232,8 +232,8 @@ export default class Game {
   public getStrippedPlayerData(): BasePlayer[] {
     const strippedPlayers = [];
     for (const player of this._players) {
-      const { username, score, host } = player;
-      strippedPlayers.push({ username, score, host });
+      const { username, score, host, isCzar } = player;
+      strippedPlayers.push({ username, score, host, isCzar });
     }
     return strippedPlayers;
   }

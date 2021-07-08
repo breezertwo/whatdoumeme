@@ -17,6 +17,7 @@ const CONFIRM_WINNER_EVENT = 'confirmSelectionWinner';
 const CONFIRM_SELECTION_EVENT = 'confirmSelection';
 
 const SOCKET_SERVER_URL = 'http://localhost:3030';
+
 export interface SocketConnection {
   roundData: RoundData;
   playersData: any;
@@ -53,10 +54,10 @@ const useConnection = (roomId: string): SocketConnection => {
 
     socketRef.current.on(GAME_RECIVE_LISTENER, (data) => {
       if (!Cookies.get('roomId')) {
-        Cookies.set('roomId', data._id);
+        Cookies.set('roomId', data.id);
       }
-      setPlayersData(data._players);
-      setServerState(data._STATE);
+      setPlayersData(data.playerData);
+      setServerState(data.state);
     });
 
     socketRef.current.on(NEW_ROUND_LISTENER, (data) => {

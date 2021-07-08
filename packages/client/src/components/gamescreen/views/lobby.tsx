@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import PersonIcon from '@material-ui/icons/Person';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
 import Cookies from 'js-cookie';
 import { Button } from '@material-ui/core';
+import { PlayerList } from '../../common';
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     root: {
       width: '100%',
@@ -19,30 +17,16 @@ const useStyles = makeStyles((theme: Theme) =>
       justifyContent: 'space-between',
       alignItems: 'center',
     },
-    item: {
-      backgroundColor: theme.palette.background.paper,
-      margin: '5px 0;',
-    },
-    itemHost: {
-      backgroundColor: '#f0c348',
-      margin: '5px 0;',
-    },
-    listItemContainer: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      flexGrow: 1,
-    },
     divContainerEnd: {
       display: 'flex',
       justifyContent: 'space-between',
     },
-    spacing: {
-      margin: 5,
-    },
     button: {
       margin: 5,
       flexGrow: 1,
+    },
+    spacing: {
+      margin: 5,
     },
   })
 );
@@ -91,16 +75,7 @@ export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.
           </Button>
         </div>
       </div>
-      <List className={classes.spacing} component="nav">
-        {players.map((player, i) => (
-          <ListItem key={i} className={player.host ? classes.itemHost : classes.item}>
-            <div className={classes.listItemContainer}>
-              {player.username}
-              {player.host ? <PersonIcon /> : null}
-            </div>
-          </ListItem>
-        ))}
-      </List>
+      <PlayerList players={players} />
     </div>
   );
 };

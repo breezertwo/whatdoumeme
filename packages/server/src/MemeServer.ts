@@ -97,26 +97,40 @@ export class MemeServer {
           game.joinGame(username, socket.id);
           socket.join(game.id);
 
-          const player = game.getPlayerByName(username);
-          //TODO: Clean this mess up
-          if (game.state === STATES.WAITING) {
-            socket.emit(MemeServer.GAME_RECEIVE_EVENT, game);
-            socket.broadcast
-              .to(game.id)
-              .emit(MemeServer.GET_PLAYER_EVENT, game.getStrippedPlayerData());
-          } else if (
-            (game.state === STATES.STARTED ||
-              game.state === STATES.ANSWERS ||
-              game.state === STATES.MEMELORD) &&
-            player.length
-          ) {
-            if (!player[0].hasCommitted)
-              socket.emit(MemeServer.NEW_ROUND_EVENT, game.getRound(username));
-            else
-              socket.emit(MemeServer.NEW_ROUND_EVENT, {
-                ...game.getRound(username),
-                serverState: STATES.COMITTED,
+          switch (game.state) {
+            case STATES.WAITING:
+              socket.emit(MemeServer.GAME_RECEIVE_EVENT, {
+                id: game.id,
+                state: game.state,
+                playerData: game.getStrippedPlayerData(),
               });
+
+              socket.broadcast
+                .to(game.id)
+                .emit(MemeServer.GET_PLAYER_EVENT, game.getStrippedPlayerData());
+
+              break;
+            case STATES.STARTED:
+            case STATES.ANSWERS:
+            case STATES.MEMELORD:
+              const player = game.getPlayerByName(username);
+
+              if (player.length) {
+                if (!player[0].hasCommitted)
+                  socket.emit(MemeServer.NEW_ROUND_EVENT, game.getRound(username));
+                else {
+                  socket.emit(MemeServer.NEW_ROUND_EVENT, {
+                    ...game.getRound(username),
+                    serverState: STATES.COMITTED,
+                  });
+                }
+
+                socket.emit(MemeServer.GET_PLAYER_EVENT, game.getStrippedPlayerData());
+              }
+              break;
+            default:
+              console.log('[S] Connection error');
+              break;
           }
         }
       }
