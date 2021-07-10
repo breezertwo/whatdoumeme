@@ -70,8 +70,7 @@ const useConnection = (roomId: string): SocketConnection => {
     });
 
     socketRef.current.on(GET_ROUNDEND_LISTENER, () => {
-      Cookies.remove('roomId');
-      history.push(`/`);
+      setServerState(STATES.END);
     });
   }, []);
 

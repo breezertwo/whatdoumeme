@@ -53,14 +53,6 @@ export default class Game {
     this._id = Utils.generateUniqueId();
     this._host = host;
     this.MAX_SCORE = 2;
-
-    this.deckMeme = [];
-    this.deckCards = [];
-
-    this.selectedMeme = undefined;
-    this.currentPlayedCards = [];
-
-    this.copyDeck();
   }
 
   get state(): number {
@@ -76,6 +68,13 @@ export default class Game {
   }
 
   public initGame(): void {
+    // TODO: Destinguish reset and new game
+    this.resetPlayers();
+    this.copyDeck();
+
+    this.selectedMeme = undefined;
+    this.currentPlayedCards = [];
+
     this.shuffleToPlayer(7);
 
     // make random player czar
@@ -100,6 +99,23 @@ export default class Game {
       }
     }
     //}
+  }
+
+  public resetPlayers(): void {
+    const temp: Player[] = [];
+    for (const player of this._players) {
+      temp.push({
+        username: player.username,
+        socketId: player.socketId,
+        score: 0,
+        hasCommitted: false,
+        isCzar: false,
+        host: player.username === this._host,
+        cards: [],
+        winCards: [],
+      });
+    }
+    this._players = temp;
   }
 
   private copyDeck(): void {

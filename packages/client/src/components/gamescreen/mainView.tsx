@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 
 import useConnection from '../../hooks/useConnection';
 import LoadingSpinner from '../common/loadingSpinner';
-import { CzarView, GameView, CommittedView, Lobby, WinnerView } from './views';
+import { CzarView, GameView, CommittedView, Lobby, WinnerView, EndScreenView } from './views';
 import { TabBar, TabPanel } from './views/subviews';
 
 import { STATES } from '../../interfaces/api';
@@ -15,22 +15,22 @@ interface ParamTypes {
 
 const Home = (): JSX.Element => {
   const [selectedCardId, setSelectedCard] = useState<string>(null);
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
   const { roomId } = useParams<ParamTypes>();
 
   const { roundData, playersData, serverState, startGame, leaveGame, confirmCard, confirmMeme } =
     useConnection(roomId);
 
-  const onCardClicked = (id: string) => {
+  const onCardClicked = (id: string): void => {
     console.log(id);
     setSelectedCard(id);
   };
 
-  const handleChange = (newValue: number) => {
+  const handleTabChange = (newValue: number): void => {
     setValue(newValue);
   };
 
-  const getViewByState = () => {
+  const getViewByState = (): JSX.Element => {
     switch (serverState) {
       case STATES.WAITING:
         return <Lobby players={playersData} onStartClick={startGame} onLeaveClick={leaveGame} />;
@@ -57,6 +57,8 @@ const Home = (): JSX.Element => {
         return <WinnerView roundData={roundData} />;
       case STATES.COMITTED:
         return <CommittedView memeURL={roundData.randomMeme} />;
+      case STATES.END:
+        return <EndScreenView playerData={playersData} onRestart={startGame} onLeave={leaveGame} />;
       case STATES.LOADING:
         return <LoadingSpinner msg={'Game is loading...'} />;
       default:
@@ -64,9 +66,9 @@ const Home = (): JSX.Element => {
     }
   };
 
-  return (
+  return serverState !== STATES.END ? (
     <>
-      <TabBar serverState={serverState} handleChange={handleChange}></TabBar>
+      <TabBar serverState={serverState} handleChange={handleTabChange} />
       <TabPanel value={value} index={0}>
         {getViewByState()}
       </TabPanel>
@@ -74,9 +76,11 @@ const Home = (): JSX.Element => {
         <ScoreBoard playerData={playersData} />
       </TabPanel>
       <TabPanel value={value} index={2}>
-        Item Three
+        <p>coming soon...</p>
       </TabPanel>
     </>
+  ) : (
+    getViewByState()
   );
 };
 

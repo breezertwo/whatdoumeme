@@ -3,6 +3,7 @@ import { createStyles, makeStyles } from '@material-ui/core/styles';
 import Cookies from 'js-cookie';
 import { Button } from '@material-ui/core';
 import { PlayerList } from '../../common';
+import { useIsHost } from '../../../hooks/useIsHost';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -38,17 +39,8 @@ export interface LobbyProps {
 }
 
 export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.Element => {
-  const [isHost, setIsHost] = useState(false);
   const classes = useStyles();
-
-  useEffect(() => {
-    if (players.length > 0) {
-      const player = players.filter((player) => player.username === Cookies.get('userName'))[0];
-      if (player) {
-        setIsHost((player as any).host);
-      }
-    }
-  }, [players]);
+  const isHost = useIsHost(players);
 
   return (
     <div className={classes.root}>

@@ -7,6 +7,7 @@ export enum STATES {
   ANSWERS = 3,
   MEMELORD = 4,
   WINNER = 5,
+  END = 6,
 }
 
 // TODO: Type API
