@@ -63,7 +63,6 @@ const Cards = ({
           ))}
         </GridList>
       ) : null}
-      ;
     </div>
   );
 };
