@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import Cookies from 'js-cookie';
 import { Button } from '@material-ui/core';
 import { PlayerList } from '../../common';
 import { useIsHost } from '../../../hooks/useIsHost';
+import { Player } from '../../../interfaces/api';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -33,7 +34,7 @@ const useStyles = makeStyles(() =>
 );
 
 export interface LobbyProps {
-  players: any[];
+  players: Player[];
   onLeaveClick: () => void;
   onStartClick: () => void;
 }

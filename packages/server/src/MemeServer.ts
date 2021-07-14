@@ -29,6 +29,7 @@ export class MemeServer {
   private static readonly ON_MEMESELECTED_LISTENER: string = 'confirmMeme';
   private static readonly ON_CARDSELECTCONFIRM_LISTENER: string = 'confirmSelection';
   private static readonly ON_WINNERCONFIRM_LISTENER: string = 'confirmSelectionWinner';
+  private static readonly ON_TRADEINCARD_LISTENER: string = 'tradeInCard';
 
   private static readonly PORT: number = 3030;
 
@@ -84,13 +85,13 @@ export class MemeServer {
 
       if (userDb) {
         const username = userDb.username;
-        const roomId = cookies.roomId || socket.handshake.query.roomId;
+        const roomId = cookies.roomId || (socket.handshake.query.roomId as string);
 
         if (roomId === ':create') {
           game = new Game(username);
           this.activeGames.set(game.id, game);
         } else if (roomId) {
-          game = this.activeGames.get(roomId as string);
+          game = this.activeGames.get(roomId.toUpperCase());
         }
 
         if (game) {
@@ -102,12 +103,12 @@ export class MemeServer {
               socket.emit(MemeServer.GAME_RECEIVE_EVENT, {
                 id: game.id,
                 state: game.state,
-                playerData: game.getStrippedPlayerData(),
+                playerData: game.getFrontendPlayerData(),
               });
 
               socket.broadcast
                 .to(game.id)
-                .emit(MemeServer.GET_PLAYER_EVENT, game.getStrippedPlayerData());
+                .emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
 
               break;
             case STATES.STARTED:
@@ -125,7 +126,7 @@ export class MemeServer {
                   });
                 }
 
-                socket.emit(MemeServer.GET_PLAYER_EVENT, game.getStrippedPlayerData());
+                socket.emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
               }
               break;
             default:
@@ -144,7 +145,7 @@ export class MemeServer {
             socket.leave(game.id);
             callback();
 
-            this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.players);
+            this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
 
             if (game.players.length === 0) {
               this.activeGames.delete(game.id);
@@ -157,8 +158,20 @@ export class MemeServer {
         const { game } = await this.getUserData(data);
 
         if (game) {
-          game.initGame();
+          game.initGame(2);
           emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
+        }
+      });
+
+      socket.on(MemeServer.ON_TRADEINCARD_LISTENER, async (data) => {
+        const { user, game } = await this.getUserData(data);
+
+        if (game) {
+          const opState = game.renewPlayerCards(user.username);
+          if (opState) {
+            socket.emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
+            socket.emit(MemeServer.NEW_ROUND_EVENT, game.getRound(user.username));
+          }
         }
       });
 
@@ -191,7 +204,7 @@ export class MemeServer {
         if (game) {
           const result = game.setWinningCard(data.cardId);
           emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT, { winner: result.winner });
-          this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getStrippedPlayerData());
+          this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
 
           if (result.hasRoundEnded) {
             game.startNewRound();

@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-
 import useConnection from '../../hooks/useConnection';
 import LoadingSpinner from '../common/loadingSpinner';
 import { CzarView, GameView, CommittedView, Lobby, WinnerView, EndScreenView } from './views';
 import { TabBar, TabPanel } from './views/subviews';
-
 import { STATES } from '../../interfaces/api';
 import { ScoreBoard } from '../scoreboard/scoreBoard';
+import { ActionsView } from '../actionmenue/actionmenue';
 
 interface ParamTypes {
   roomId: string;
@@ -18,8 +17,16 @@ const Home = (): JSX.Element => {
   const [value, setValue] = useState(0);
   const { roomId } = useParams<ParamTypes>();
 
-  const { roundData, playersData, serverState, startGame, leaveGame, confirmCard, confirmMeme } =
-    useConnection(roomId);
+  const {
+    roundData,
+    playersData,
+    serverState,
+    startGame,
+    leaveGame,
+    confirmCard,
+    confirmMeme,
+    tradeInWin,
+  } = useConnection(roomId);
 
   const onCardClicked = (id: string): void => {
     console.log(id);
@@ -28,6 +35,16 @@ const Home = (): JSX.Element => {
 
   const handleTabChange = (newValue: number): void => {
     setValue(newValue);
+  };
+
+  const handleConfirmCard = (): void => {
+    confirmCard(selectedCardId);
+    setSelectedCard(null);
+  };
+
+  const handleConfirmMeme = (): void => {
+    confirmMeme(selectedCardId);
+    setSelectedCard(null);
   };
 
   const getViewByState = (): JSX.Element => {
@@ -39,7 +56,7 @@ const Home = (): JSX.Element => {
         return (
           <GameView
             roundData={roundData}
-            onConfirmClicked={() => confirmCard(selectedCardId)}
+            onConfirmClicked={handleConfirmCard}
             onCardClicked={onCardClicked}
             onLeaveClick={leaveGame}
           />
@@ -48,7 +65,7 @@ const Home = (): JSX.Element => {
         return (
           <CzarView
             roundData={roundData}
-            onConfirmClicked={() => confirmMeme(selectedCardId)}
+            onConfirmClicked={handleConfirmMeme}
             onCardClicked={onCardClicked}
             onLeaveClick={leaveGame}
           />
@@ -76,7 +93,7 @@ const Home = (): JSX.Element => {
         <ScoreBoard playerData={playersData} />
       </TabPanel>
       <TabPanel value={value} index={2}>
-        <p>coming soon...</p>
+        <ActionsView playerData={playersData} serverState={serverState} onTradeIn={tradeInWin} />
       </TabPanel>
     </>
   ) : (

@@ -2,10 +2,10 @@ import React from 'react';
 import { Button, makeStyles } from '@material-ui/core';
 import { useIsHost } from '../../../hooks/useIsHost';
 import { PlayerList } from '../../common';
-import { useMainContianerStyles } from './styles/sharedStyles';
+import { Player } from '../../../interfaces/api';
 
 export interface EndScreenProps {
-  playerData: any[];
+  playerData: Player[];
   onRestart: () => void;
   onLeave: () => void;
 }
@@ -26,8 +26,7 @@ export const EndScreenView = ({ playerData, onRestart, onLeave }: EndScreenProps
   const isHost = useIsHost(playerData);
 
   return (
-    // TODO: Style properly
-    <div>
+    <>
       <h1>Game ended!</h1>
       <PlayerList players={playerData} includeGameData={true} />
       <div className={classes.divContainerEnd}>
@@ -44,6 +43,6 @@ export const EndScreenView = ({ playerData, onRestart, onLeave }: EndScreenProps
           Leave
         </Button>
       </div>
-    </div>
+    </>
   );
 };

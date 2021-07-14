@@ -1,21 +1,7 @@
 import deepcopy from 'deepcopy';
 import { deck } from './db';
-import { MemeCard, RoundData, WhiteCard } from './interfaces/game';
+import { MemeCard, RoundData, WhiteCard, Player, BasePlayer } from './interfaces/game';
 import * as Utils from './utils';
-
-interface BasePlayer {
-  username: string;
-  host: boolean;
-  score: number;
-  isCzar: boolean;
-}
-
-interface Player extends BasePlayer {
-  socketId: string;
-  hasCommitted: boolean;
-  cards: WhiteCard[];
-  winCards: MemeCard[];
-}
 
 interface RoundResult {
   hasRoundEnded: boolean;
@@ -35,7 +21,8 @@ export default class Game {
   private readonly _id: string;
   private readonly _host: string;
 
-  private readonly MAX_SCORE: number;
+  private MAX_SCORE: number;
+  private readonly HANDCARDS_AMOUNT = 7;
 
   private _players: Player[] = [];
 
@@ -52,7 +39,6 @@ export default class Game {
     this._STATE = STATES.WAITING;
     this._id = Utils.generateUniqueId();
     this._host = host;
-    this.MAX_SCORE = 2;
   }
 
   get state(): number {
@@ -67,7 +53,9 @@ export default class Game {
     return this._players;
   }
 
-  public initGame(): void {
+  public initGame(winningScore?: number): void {
+    if (winningScore) this.MAX_SCORE = winningScore;
+
     // TODO: Destinguish reset and new game
     this.resetPlayers();
     this.copyDeck();
@@ -75,7 +63,7 @@ export default class Game {
     this.selectedMeme = undefined;
     this.currentPlayedCards = [];
 
-    this.shuffleToPlayer(7);
+    this.shuffleToPlayer();
 
     // make random player czar
     const czar = this._players.random();
@@ -90,32 +78,26 @@ export default class Game {
     return this._players.filter((player) => player.username === playerName);
   }
 
-  private shuffleToPlayer(amount: number): void {
-    //TODO: Enough cards for players check
-    //if (this.players.length * amount < this.deck.whiteCards.length) {
-    for (let i = 0; i < amount; i++) {
+  private shuffleToPlayer(): void {
+    if (this.players.length * this.HANDCARDS_AMOUNT < this.deckCards.length) {
       for (const player of this._players) {
-        player.cards.push(this.deckCards.popRandom());
+        for (let i = this.HANDCARDS_AMOUNT; i--; ) player.cards.push(this.deckCards.popRandom());
       }
+    } else {
+      //TODO: Send this to frontend
+      console.log('[G] Not enough cards to play with this amount of players');
     }
-    //}
   }
 
   public resetPlayers(): void {
-    const temp: Player[] = [];
     for (const player of this._players) {
-      temp.push({
-        username: player.username,
-        socketId: player.socketId,
-        score: 0,
-        hasCommitted: false,
-        isCzar: false,
-        host: player.username === this._host,
-        cards: [],
-        winCards: [],
-      });
+      player.score = 0;
+      player.tradeOptions = 0;
+      player.hasCommitted = false;
+      player.isCzar = false;
+      player.cards = [];
+      player.winCards = [];
     }
-    this._players = temp;
   }
 
   private copyDeck(): void {
@@ -125,9 +107,10 @@ export default class Game {
     this.deckCards = _deck.whiteCards;
   }
 
-  private getWhiteCard(): WhiteCard {
-    //if (this.players.length * amount < this.deck.whiteCards.length)
-    return this.deckCards.splice((this.deckCards.length * Math.random()) | 0, 1)[0];
+  private getWhiteCard(): WhiteCard | undefined {
+    return this.deckCards.length > 0
+      ? this.deckCards.splice((this.deckCards.length * Math.random()) | 0, 1)[0]
+      : undefined;
   }
 
   public joinGame(playerName: string, socketId: string): void {
@@ -137,6 +120,7 @@ export default class Game {
         username: playerName,
         socketId,
         score: 0,
+        tradeOptions: 0,
         hasCommitted: false,
         isCzar: false,
         host: playerName === this._host,
@@ -188,7 +172,6 @@ export default class Game {
 
   public setSelectedPlayerCard(playerName: string, cardId: string): void {
     const player = this.getPlayerByName(playerName)[0];
-    //const card = removeItemAndReturn(player.cards, (card) => card.cardId === cardId);
     const card = player.cards.removeAndReturn((card) => card.cardId === cardId);
 
     player.hasCommitted = true;
@@ -207,6 +190,7 @@ export default class Game {
     const winningPlayer = this.getPlayerByName(this.currentPlayedCards[0].owner)[0];
 
     winningPlayer.score++;
+    winningPlayer.tradeOptions++;
     winningPlayer.winCards.push(this.selectedMeme);
 
     this._STATE = STATES.WINNER;
@@ -245,12 +229,31 @@ export default class Game {
     console.log(`[G] ${this.id} starting new round in 10 sec`);
   }
 
-  public getStrippedPlayerData(): BasePlayer[] {
+  public getFrontendPlayerData(): BasePlayer[] {
     const strippedPlayers = [];
     for (const player of this._players) {
-      const { username, score, host, isCzar } = player;
-      strippedPlayers.push({ username, score, host, isCzar });
+      const { username, score, tradeOptions, host, isCzar } = player;
+      strippedPlayers.push({ username, score, tradeOptions, host, isCzar });
     }
     return strippedPlayers;
+  }
+
+  public renewPlayerCards(playerName: string): boolean {
+    const player = this.getPlayerByName(playerName)[0];
+
+    if (player.tradeOptions > 0) {
+      player.tradeOptions--;
+
+      const tempCards = player.cards;
+      player.cards = [];
+
+      for (let i = this.HANDCARDS_AMOUNT; i--; ) player.cards.push(this.deckCards.popRandom());
+
+      this.deckCards = [...this.deckCards, ...tempCards];
+
+      return true;
+    }
+
+    return false;
   }
 }

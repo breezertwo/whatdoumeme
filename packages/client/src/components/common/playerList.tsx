@@ -1,14 +1,16 @@
 import React from 'react';
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import PersonIcon from '@material-ui/icons/Person';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
+import { Player } from '../../interfaces/api';
 
 const useStyles = makeStyles(() =>
   createStyles({
     item: {
       backgroundColor: '#feffed',
       margin: '5px 0;',
+      minWidth: 250,
     },
     itemHost: {
       backgroundColor: '#f0c348',
@@ -27,7 +29,7 @@ const useStyles = makeStyles(() =>
 );
 
 export interface PlayerListProps {
-  players: any[];
+  players: Player[];
   includeGameData?: boolean;
 }
 

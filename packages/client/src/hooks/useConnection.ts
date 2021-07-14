@@ -3,7 +3,7 @@ import socketIOClient, { Socket } from 'socket.io-client';
 import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
 import Cookies from 'js-cookie';
 import { useHistory } from 'react-router-dom';
-import { RoundData, STATES } from '../interfaces/api';
+import { RoundData, Player, STATES } from '../interfaces/api';
 
 const GAME_RECIVE_LISTENER = 'sendGame';
 const NEW_ROUND_LISTENER = 'newRound';
@@ -15,22 +15,24 @@ const START_GAME_EVENT = 'startGame';
 const CONFIRM_MEMESELECT_EVENT = 'confirmMeme';
 const CONFIRM_WINNER_EVENT = 'confirmSelectionWinner';
 const CONFIRM_SELECTION_EVENT = 'confirmSelection';
+const TRADEINCARD_EVENT = 'tradeInCard';
 
 const SOCKET_SERVER_URL = 'http://localhost:3030';
 
 export interface SocketConnection {
   roundData: RoundData;
-  playersData: any;
+  playersData: Player[];
   serverState: number;
   startGame: () => void;
   leaveGame: () => void;
   confirmMeme: (cardId: string) => void;
   confirmCard: (cardId: string) => void;
+  tradeInWin: () => void;
 }
 
 const useConnection = (roomId: string): SocketConnection => {
   const [roundData, setRoundData] = useState<RoundData>({});
-  const [playersData, setPlayersData] = useState([]);
+  const [playersData, setPlayersData] = useState<Player[]>([]);
   const [serverState, setServerState] = useState(Cookies.get('roomId') ? -1 : 0);
 
   const socketRef = useRef<Socket<DefaultEventsMap, DefaultEventsMap>>(null);
@@ -74,7 +76,7 @@ const useConnection = (roomId: string): SocketConnection => {
     });
   }, []);
 
-  const leaveGame = () => {
+  const leaveGame = (): void => {
     socketRef.current.emit(
       LEAVE_GAME_EVENT,
       {
@@ -88,13 +90,13 @@ const useConnection = (roomId: string): SocketConnection => {
     );
   };
 
-  const startGame = () => {
+  const startGame = (): void => {
     socketRef.current.emit(START_GAME_EVENT, {
       roomId: Cookies.get('roomId'),
     });
   };
 
-  const confirmMeme = (cardId) => {
+  const confirmMeme = (cardId: string): void => {
     if (cardId) {
       socketRef.current.emit(CONFIRM_MEMESELECT_EVENT, {
         roomId: Cookies.get('roomId'),
@@ -103,7 +105,7 @@ const useConnection = (roomId: string): SocketConnection => {
     }
   };
 
-  const confirmCard = (cardId) => {
+  const confirmCard = (cardId: string): void => {
     if (cardId) {
       const EMIT_EVENT =
         serverState === STATES.ANSWERS ? CONFIRM_WINNER_EVENT : CONFIRM_SELECTION_EVENT;
@@ -123,6 +125,13 @@ const useConnection = (roomId: string): SocketConnection => {
     }
   };
 
+  const tradeInWin = (): void => {
+    socketRef.current.emit(TRADEINCARD_EVENT, {
+      senderId: Cookies.get('userName'),
+      roomId: Cookies.get('roomId'),
+    });
+  };
+
   return {
     roundData,
     playersData,
@@ -131,6 +140,7 @@ const useConnection = (roomId: string): SocketConnection => {
     leaveGame,
     confirmCard,
     confirmMeme,
+    tradeInWin,
   };
 };
 

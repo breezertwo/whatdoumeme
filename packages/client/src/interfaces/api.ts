@@ -22,3 +22,11 @@ export interface RoundData {
   randomMeme?: string;
   winner?: string;
 }
+
+export interface Player {
+  username: string;
+  host: boolean;
+  score: number;
+  tradeOptions: number;
+  isCzar: boolean;
+}
