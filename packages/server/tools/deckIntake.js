@@ -12,9 +12,6 @@ const path = require('path');
 const imgPath = __dirname + '/img/';
 const convImgPath = __dirname + '/imgConv/';
 
-const cardsArray = [];
-const memesArray = [];
-
 const emptyDeck = {
   memeCards: [],
   whiteCards: [],
@@ -22,28 +19,25 @@ const emptyDeck = {
 
 let cardCounter = 0;
 
-fs.createReadStream('cardsRawData.csv')
+const fileDir = fs.readdirSync(imgPath);
+
+fileDir.forEach(async (filename, i) => {
+  if (filename.match(/.(jpg|jpeg|png|gif)$/i)) {
+    const newFileName = `meme${i}${path.extname(filename)}`;
+
+    await fs.promises.rename(imgPath + filename, convImgPath + newFileName);
+    emptyDeck.memeCards.push({ name: newFileName, cardId: `M${i}` });
+  } else {
+    console.log(`${filename} is not an image`);
+  }
+});
+
+fs.createReadStream('./cardsRawData.csv')
   .pipe(csv())
   .on('data', (row) => {
-    cardsArray.push({ text: row.CardTexts, cardId: `C${cardCounter++}` });
+    emptyDeck.whiteCards.push({ text: row.CardTexts, cardId: `C${cardCounter++}` });
   })
   .on('end', () => {
-    const fileDir = fs.readdirSync(imgPath);
-
-    fileDir.forEach((filename, i) => {
-      if (filename.match(/.(jpg|jpeg|png|gif)$/i)) {
-        const newFileName = `meme${i}${path.extname(filename)}`;
-
-        fs.renameSync(imgPath + filename, convImgPath + newFileName);
-        memesArray.push({ name: newFileName, cardId: `M${i}` });
-      } else {
-        console.log(`${filename} is not an image`);
-      }
-    });
-
-    emptyDeck.whiteCards = cardsArray;
-    emptyDeck.memeCards = memesArray;
-
     const data = JSON.stringify(emptyDeck);
 
     fs.writeFileSync('deck.json', data);
