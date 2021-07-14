@@ -21,7 +21,6 @@ module.exports = merge(commonConfig, {
       },
     ],
   },
-  devtool: 'source-map',
   optimization: {
     moduleIds: 'deterministic',
     runtimeChunk: 'single',
