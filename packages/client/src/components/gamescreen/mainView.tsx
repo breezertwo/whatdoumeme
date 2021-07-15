@@ -14,7 +14,7 @@ interface ParamTypes {
 
 const Home = (): JSX.Element => {
   const [selectedCardId, setSelectedCard] = useState<string>(null);
-  const [value, setValue] = useState(0);
+  const [activeTabId, setActiveTab] = useState(0);
   const { roomId } = useParams<ParamTypes>();
 
   const {
@@ -29,12 +29,11 @@ const Home = (): JSX.Element => {
   } = useConnection(roomId);
 
   const onCardClicked = (id: string): void => {
-    console.log(id);
     setSelectedCard(id);
   };
 
-  const handleTabChange = (newValue: number): void => {
-    setValue(newValue);
+  const handleTabChange = (tabId: number): void => {
+    setActiveTab(tabId);
   };
 
   const handleConfirmCard = (): void => {
@@ -84,17 +83,24 @@ const Home = (): JSX.Element => {
   };
 
   return serverState !== STATES.END ? (
+    // This can be improved ... but I currently don't care
     <>
       <TabBar serverState={serverState} handleChange={handleTabChange} />
-      <TabPanel value={value} index={0}>
-        {getViewByState()}
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <ScoreBoard playerData={playersData} />
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        <ActionsView playerData={playersData} serverState={serverState} onTradeIn={tradeInWin} />
-      </TabPanel>
+      {activeTabId === 0 ? (
+        <TabPanel active={activeTabId} index={0}>
+          {getViewByState()}
+        </TabPanel>
+      ) : null}
+      {activeTabId === 1 ? (
+        <TabPanel active={activeTabId} index={1}>
+          <ScoreBoard playerData={playersData} />
+        </TabPanel>
+      ) : null}
+      {activeTabId === 2 ? (
+        <TabPanel active={activeTabId} index={2}>
+          <ActionsView playerData={playersData} onTradeIn={tradeInWin} />
+        </TabPanel>
+      ) : null}
     </>
   ) : (
     getViewByState()

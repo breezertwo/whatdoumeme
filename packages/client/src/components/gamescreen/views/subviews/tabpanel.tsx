@@ -1,23 +1,24 @@
 import React from 'react';
-import Box from '@material-ui/core/Box';
+import { useBasicFlex } from '../styles/sharedStyles';
 
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
-  value: number;
+  active: number;
 }
 
 export const TabPanel = (props: TabPanelProps): JSX.Element => {
-  const { children, value, index, ...other } = props;
+  const { children, active, index, ...other } = props;
+  const classes = useBasicFlex();
 
   return (
     <div
+      className={classes.basicFlex}
       role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
+      hidden={active !== index}
+      id={`tabpanel-${index}`}
       {...other}>
-      {value === index && <Box p={1}>{children}</Box>}
+      {active === index && <>{children}</>}
     </div>
   );
 };

@@ -21,21 +21,19 @@ export const CzarView = ({
 }: CzarViewProps): JSX.Element => {
   const classes = useMainContianerStyles();
 
-  return (
-    <div className={classes.mainContainer}>
-      {roundData.isCzar ? (
-        <>
-          <h1>You are the meme czar. Select a meme...</h1>
-          <Cards
-            onCardClicked={onCardClicked}
-            playerCards={roundData.memeCards}
-            isCzar={roundData.isCzar}
-          />
-          <ButtonContainer onConfirmClicked={onConfirmClicked} onLeaveClick={onLeaveClick} />
-        </>
-      ) : (
-        <LoadingSpinner msg={`Wait until czar "${roundData.currentCzar}" selects a meme...`} />
-      )}
+  return roundData.isCzar ? (
+    <div className={classes.mainContainer} style={{ justifyContent: 'space-around' }}>
+      <>
+        <h2>You are the meme czar. Select a meme...</h2>
+        <Cards
+          onCardClicked={onCardClicked}
+          playerCards={roundData.memeCards}
+          isCzar={roundData.isCzar}
+        />
+        <ButtonContainer onConfirmClicked={onConfirmClicked} onLeaveClick={onLeaveClick} />
+      </>
     </div>
+  ) : (
+    <LoadingSpinner msg={`Wait until czar "${roundData.currentCzar}" selects a meme...`} />
   );
 };
