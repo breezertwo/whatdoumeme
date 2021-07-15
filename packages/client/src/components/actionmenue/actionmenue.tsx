@@ -1,37 +1,32 @@
 import React from 'react';
-import Cookies from 'js-cookie';
 import { Button, makeStyles } from '@material-ui/core';
-import { Player, STATES } from '../../interfaces/api';
+import { Player } from '../../interfaces/api';
+import { useMainContianerStyles } from '../gamescreen/views/styles/sharedStyles';
+import { useGetPlayerFromPlayerData } from '../../hooks/useGetPlayerFromPlayerData';
 
 export interface ActionsViewProps {
   playerData: Player[];
-  serverState: number;
   onTradeIn: () => void;
 }
 
 const useStyles = makeStyles({
   button: {
-    margin: 5,
-    flexGrow: 1,
+    marginTop: 5,
   },
 });
 
-export const ActionsView = ({
-  playerData,
-  serverState,
-  onTradeIn,
-}: ActionsViewProps): JSX.Element => {
+export const ActionsView = ({ playerData, onTradeIn }: ActionsViewProps): JSX.Element => {
+  const player = useGetPlayerFromPlayerData(playerData);
   const classes = useStyles();
-  const winpoints = playerData.filter((player) => player.username === Cookies.get('userName'))[0]
-    .tradeOptions;
+  const classesMain = useMainContianerStyles();
 
   return (
-    <>
-      {serverState !== STATES.MEMELORD ? (
+    <div className={classesMain.mainContainer}>
+      {player && !player.isCzar ? (
         <>
           <h2>Use a winpoint to reset your handcards</h2>
-          <p>Winpoints left: {winpoints}</p>
-          {winpoints > 0 ? (
+          <p>Winpoints left: {player.tradeOptions}</p>
+          {player.tradeOptions > 0 ? (
             <Button
               variant="contained"
               className={classes.button}
@@ -44,6 +39,6 @@ export const ActionsView = ({
       ) : (
         <p>No available action</p>
       )}
-    </>
+    </div>
   );
 };

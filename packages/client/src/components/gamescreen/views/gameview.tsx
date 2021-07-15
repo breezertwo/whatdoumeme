@@ -24,7 +24,7 @@ export const GameView = ({
   const czarIsSelecting = serverState === STATES.ANSWERS;
 
   return !roundData.isCzar || (roundData.isCzar && czarIsSelecting) ? (
-    <div className={classes.mainContainer}>
+    <div className={classes.mainContainer} style={{ justifyContent: 'space-around' }}>
       <MemeView currentMeme={currentMeme} />
       <Cards
         onCardClicked={onCardClicked}

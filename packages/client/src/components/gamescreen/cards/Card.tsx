@@ -13,7 +13,13 @@ const useStyles = makeStyles<Theme, CardProps>(() =>
       height: (props) => (props.isCzar && !props.isShowComitted ? 500 : 250),
       width: (props) => (props.isCzar && !props.isShowComitted ? 300 : 150),
       margin: 5,
+      textAlign: 'center',
       backgroundColor: (props) => (props.isHighlighted ? '#89e8a0' : 'white'),
+    },
+    imgTag: {
+      maxWidth: '100%',
+      maxHeight: '100%',
+      verticalAlign: 'middle',
     },
   })
 );
@@ -35,7 +41,7 @@ const TextCard = (props: CardProps): JSX.Element => {
     <Card className={classes.card} variant="outlined" onClick={() => onCardClicked(cardId)}>
       <CardContent>
         {isCzar ? (
-          <img src={`assets/memes/${text}`} alt="It's a meme" />
+          <img className={classes.imgTag} src={`assets/memes/${text}`} alt="It's a meme" />
         ) : (
           <Typography variant="body2" component="p">
             {text}

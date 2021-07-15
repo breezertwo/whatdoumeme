@@ -11,7 +11,6 @@ const useStyles = makeStyles(() =>
     root: {
       width: '100%',
       maxWidth: 360,
-      alignSelf: 'center',
     },
     header: {
       display: 'flex',
