@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import Cookies from 'js-cookie';
-import { Button } from '@material-ui/core';
+import { Button, TextField } from '@material-ui/core';
 import { PlayerList } from '../../common';
 import { useIsHost } from '../../../hooks/useIsHost';
 import { Player } from '../../../interfaces/api';
@@ -36,12 +36,17 @@ const useStyles = makeStyles(() =>
 export interface LobbyProps {
   players: Player[];
   onLeaveClick: () => void;
-  onStartClick: () => void;
+  onStartClick: (maxWinPoints?: number) => void;
 }
 
 export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.Element => {
+  const [maxPoints, setMaxPoints] = useState(4);
   const classes = useStyles();
   const isHost = useIsHost(players);
+
+  const handleInputChange = (event) => {
+    setMaxPoints(event.target.value);
+  };
 
   return (
     <div className={classes.root}>
@@ -55,7 +60,7 @@ export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.
               variant="contained"
               className={classes.button}
               color="primary"
-              onClick={onStartClick}>
+              onClick={() => onStartClick(maxPoints)}>
               Start
             </Button>
           )}
@@ -68,6 +73,19 @@ export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.
           </Button>
         </div>
       </div>
+      {isHost && (
+        <div className={`${classes.header} ${classes.spacing}`}>
+          <p>Points to win: </p>
+          <TextField
+            label="Points"
+            id="ptw"
+            defaultValue="4"
+            variant="outlined"
+            size="small"
+            onChange={handleInputChange}
+          />
+        </div>
+      )}
       <PlayerList players={players} />
     </div>
   );

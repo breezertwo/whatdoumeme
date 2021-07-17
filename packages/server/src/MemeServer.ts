@@ -158,7 +158,9 @@ export class MemeServer {
         const { game } = await this.getUserData(data);
 
         if (game) {
-          game.initGame(2);
+          game.initGame(data.maxWinPoints);
+
+          this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
           emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
         }
       });

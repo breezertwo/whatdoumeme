@@ -23,7 +23,7 @@ export interface SocketConnection {
   roundData: RoundData;
   playersData: Player[];
   serverState: number;
-  startGame: () => void;
+  startGame: (maxWinPoints?: number) => void;
   leaveGame: () => void;
   confirmMeme: (cardId: string) => void;
   confirmCard: (cardId: string) => void;
@@ -90,9 +90,10 @@ const useConnection = (roomId: string): SocketConnection => {
     );
   };
 
-  const startGame = (): void => {
+  const startGame = (maxWinPoints?: number): void => {
     socketRef.current.emit(START_GAME_EVENT, {
       roomId: Cookies.get('roomId'),
+      maxWinPoints: maxWinPoints,
     });
   };
 

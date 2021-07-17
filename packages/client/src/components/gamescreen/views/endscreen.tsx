@@ -35,7 +35,7 @@ export const EndScreenView = ({ playerData, onRestart, onLeave }: EndScreenProps
             variant="contained"
             className={classes.button}
             color="primary"
-            onClick={onRestart}>
+            onClick={() => onRestart()}>
             Start new round
           </Button>
         )}
