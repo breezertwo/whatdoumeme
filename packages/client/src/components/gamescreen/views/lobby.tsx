@@ -44,7 +44,7 @@ export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.
   const isHost = useIsHost(players);
 
   const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    setMaxPoints(parseInt((event.target as HTMLInputElement).value));
+    setMaxPoints(parseInt(event.target.value));
   };
 
   return (

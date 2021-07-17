@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CustomButton } from '../gamescreen/views/subviews';
 import { useLoginStyles } from './login';
@@ -9,7 +9,7 @@ const JoinGame = (): JSX.Element => {
   const history = useHistory();
   const classes = useLoginStyles();
 
-  const handleRoomNameChange = (event) => {
+  const handleRoomNameChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     setRoomName(event.target.value);
   };
 

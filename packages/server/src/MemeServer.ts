@@ -53,7 +53,7 @@ export class MemeServer {
     this.activeGames = new Map();
 
     this.initDb();
-    this.initSocket();
+    void this.initSocket(); // don't need to wait rn
     this.listen();
   }
 

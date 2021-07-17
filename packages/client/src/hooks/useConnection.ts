@@ -118,7 +118,7 @@ const useConnection = (roomId: string): SocketConnection => {
           roomId: Cookies.get('roomId'),
           cardId,
         },
-        (data) => {
+        (data: string) => {
           setRoundData({ ...roundData, randomMeme: data });
           setServerState(STATES.COMITTED);
         }

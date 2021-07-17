@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CustomButton } from '../gamescreen/views/subviews';
 import { useLoginStyles } from './login';
@@ -9,7 +9,7 @@ const Username = (): JSX.Element => {
   const history = useHistory();
   const classes = useLoginStyles();
 
-  const handleUserameChange = (event) => {
+  const handleUserameChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     setUsername(event.target.value);
   };
 
