@@ -72,7 +72,6 @@ export default class Game {
     this._STATE = STATES.MEMELORD;
 
     console.log(`[MS] ${this.id}: Game started`);
-    console.log(this);
   }
 
   public getPlayerByName(playerName: string): Player[] {

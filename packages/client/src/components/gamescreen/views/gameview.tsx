@@ -10,6 +10,7 @@ export interface GameViewProps {
   onCardClicked: (cardId: string) => void;
   onConfirmClicked: () => void;
   onLeaveClick: () => void;
+  requestMemeUrl: () => Promise<string>;
 }
 
 export const GameView = ({
@@ -17,6 +18,7 @@ export const GameView = ({
   onConfirmClicked,
   onCardClicked,
   onLeaveClick,
+  requestMemeUrl,
 }: GameViewProps): JSX.Element => {
   const { currentMeme, playerCards, serverState } = roundData;
   const classes = useMainContianerStyles();
@@ -39,6 +41,6 @@ export const GameView = ({
       />
     </div>
   ) : (
-    <LoadingSpinner msg={'Wait until players select cards...'} />
+    <LoadingSpinner requestMemeUrl={requestMemeUrl} msg={'Wait until players select cards...'} />
   );
 };

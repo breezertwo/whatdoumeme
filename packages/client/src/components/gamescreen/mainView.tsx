@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useConnection from '../../hooks/useConnection';
 import LoadingSpinner from '../common/loadingSpinner';
-import { CzarView, GameView, CommittedView, Lobby, WinnerView, EndScreenView } from './views';
+import { CzarView, GameView, Lobby, WinnerView, EndScreenView } from './views';
 import { TabBar, TabPanel } from './views/subviews';
 import { STATES } from '../../interfaces/api';
 import { ScoreBoard } from '../scoreboard/scoreBoard';
@@ -26,6 +26,7 @@ const Home = (): JSX.Element => {
     confirmCard,
     confirmMeme,
     tradeInWin,
+    requestMemeUrl,
   } = useConnection(roomId);
 
   const onCardClicked = (id: string): void => {
@@ -58,6 +59,7 @@ const Home = (): JSX.Element => {
             onConfirmClicked={handleConfirmCard}
             onCardClicked={onCardClicked}
             onLeaveClick={leaveGame}
+            requestMemeUrl={requestMemeUrl}
           />
         );
       case STATES.MEMELORD:
@@ -67,16 +69,22 @@ const Home = (): JSX.Element => {
             onConfirmClicked={handleConfirmMeme}
             onCardClicked={onCardClicked}
             onLeaveClick={leaveGame}
+            requestMemeUrl={requestMemeUrl}
           />
         );
       case STATES.WINNER:
         return <WinnerView roundData={roundData} />;
       case STATES.COMITTED:
-        return <CommittedView memeURL={roundData.randomMeme} />;
+        return (
+          <LoadingSpinner
+            requestMemeUrl={requestMemeUrl}
+            msg={'Committed. Waiting for the others...'}
+          />
+        );
       case STATES.END:
         return <EndScreenView playerData={playersData} onRestart={startGame} onLeave={leaveGame} />;
       case STATES.LOADING:
-        return <LoadingSpinner msg={'Game is loading...'} />;
+        return <LoadingSpinner requestMemeUrl={requestMemeUrl} msg={'Game is loading...'} />;
       default:
         return <p>FAIL</p>;
     }
@@ -98,7 +106,7 @@ const Home = (): JSX.Element => {
       ) : null}
       {activeTabId === 2 ? (
         <TabPanel active={activeTabId} index={2}>
-          <ActionsView playerData={playersData} onTradeIn={tradeInWin} />
+          <ActionsView playerData={playersData} onTradeIn={tradeInWin} onLeaveGame={leaveGame} />
         </TabPanel>
       ) : null}
     </>

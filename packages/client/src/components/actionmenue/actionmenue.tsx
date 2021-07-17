@@ -7,6 +7,7 @@ import { useGetPlayerFromPlayerData } from '../../hooks/useGetPlayerFromPlayerDa
 export interface ActionsViewProps {
   playerData: Player[];
   onTradeIn: () => void;
+  onLeaveGame: () => void;
 }
 
 const useStyles = makeStyles({
@@ -15,7 +16,11 @@ const useStyles = makeStyles({
   },
 });
 
-export const ActionsView = ({ playerData, onTradeIn }: ActionsViewProps): JSX.Element => {
+export const ActionsView = ({
+  playerData,
+  onTradeIn,
+  onLeaveGame,
+}: ActionsViewProps): JSX.Element => {
   const player = useGetPlayerFromPlayerData(playerData);
   const classes = useStyles();
   const classesMain = useMainContianerStyles();
@@ -39,6 +44,14 @@ export const ActionsView = ({ playerData, onTradeIn }: ActionsViewProps): JSX.El
       ) : (
         <p>No available action</p>
       )}
+      <Button
+        variant="contained"
+        className={classes.button}
+        style={{ marginTop: 'auto' }}
+        color="secondary"
+        onClick={onLeaveGame}>
+        Leave game
+      </Button>
     </div>
   );
 };

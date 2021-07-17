@@ -30,6 +30,7 @@ export class MemeServer {
   private static readonly ON_CARDSELECTCONFIRM_LISTENER: string = 'confirmSelection';
   private static readonly ON_WINNERCONFIRM_LISTENER: string = 'confirmSelectionWinner';
   private static readonly ON_TRADEINCARD_LISTENER: string = 'tradeInCard';
+  private static readonly ON_REQUEST_MEME: string = 'requestMeme';
 
   private static readonly PORT: number = 3030;
 
@@ -143,13 +144,15 @@ export class MemeServer {
           if (game) {
             game.leaveGame(user.username);
             socket.leave(game.id);
-            callback();
+            callback(true);
 
             this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
 
             if (game.players.length === 0) {
               this.activeGames.delete(game.id);
             }
+          } else {
+            callback(false);
           }
         }
       });
@@ -218,6 +221,10 @@ export class MemeServer {
 
           this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
         }
+      });
+
+      socket.on(MemeServer.ON_REQUEST_MEME, async (_data, callback) => {
+        callback(await Utils.getRandomRedditMeme(this.db));
       });
 
       socket.on(MemeServer.ON_DSICONNECT_LISTENER, function () {

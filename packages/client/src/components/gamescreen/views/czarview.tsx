@@ -11,6 +11,7 @@ export interface CzarViewProps {
   onCardClicked: (cardId: string) => void;
   onConfirmClicked: () => void;
   onLeaveClick: () => void;
+  requestMemeUrl: () => Promise<string>;
 }
 
 export const CzarView = ({
@@ -18,6 +19,7 @@ export const CzarView = ({
   onConfirmClicked,
   onCardClicked,
   onLeaveClick,
+  requestMemeUrl,
 }: CzarViewProps): JSX.Element => {
   const classes = useMainContianerStyles();
 
@@ -34,6 +36,9 @@ export const CzarView = ({
       </>
     </div>
   ) : (
-    <LoadingSpinner msg={`Wait until czar "${roundData.currentCzar}" selects a meme...`} />
+    <LoadingSpinner
+      requestMemeUrl={requestMemeUrl}
+      msg={`Wait until czar "${roundData.currentCzar}" selects a meme...`}
+    />
   );
 };

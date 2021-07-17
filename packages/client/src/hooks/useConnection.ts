@@ -4,6 +4,7 @@ import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
 import Cookies from 'js-cookie';
 import { useHistory } from 'react-router-dom';
 import { RoundData, Player, STATES } from '../interfaces/api';
+import { rejects } from 'node:assert';
 
 const GAME_RECIVE_LISTENER = 'sendGame';
 const NEW_ROUND_LISTENER = 'newRound';
@@ -16,6 +17,7 @@ const CONFIRM_MEMESELECT_EVENT = 'confirmMeme';
 const CONFIRM_WINNER_EVENT = 'confirmSelectionWinner';
 const CONFIRM_SELECTION_EVENT = 'confirmSelection';
 const TRADEINCARD_EVENT = 'tradeInCard';
+const REQUEST_MEME_EVENT = 'requestMeme';
 
 const SOCKET_SERVER_URL = 'http://localhost:3030';
 
@@ -28,6 +30,7 @@ export interface SocketConnection {
   confirmMeme: (cardId: string) => void;
   confirmCard: (cardId: string) => void;
   tradeInWin: () => void;
+  requestMemeUrl: () => Promise<string>;
 }
 
 const useConnection = (roomId: string): SocketConnection => {
@@ -77,17 +80,42 @@ const useConnection = (roomId: string): SocketConnection => {
   }, []);
 
   const leaveGame = (): void => {
-    socketRef.current.emit(
-      LEAVE_GAME_EVENT,
-      {
-        senderId: Cookies.get('userName'),
-        roomId: Cookies.get('roomId'),
-      },
-      () => {
-        Cookies.remove('roomId');
-        history.push(`/`);
-      }
-    );
+    if (socketRef.current.connected) {
+      socketRef.current.emit(
+        LEAVE_GAME_EVENT,
+        {
+          senderId: Cookies.get('userName'),
+          roomId: Cookies.get('roomId'),
+        },
+        (ack: boolean) => {
+          if (ack) {
+            Cookies.remove('roomId');
+            history.push(`/`);
+          } else {
+            console.error('[SERVER ERROR] Lost game');
+            console.error('[GAME] Reseting...');
+            Cookies.remove('roomId');
+            history.push(`/`);
+          }
+        }
+      );
+    } else {
+      console.error('[SERVER ERROR] No connection');
+      console.error('[GAME] Reseting');
+      Cookies.remove('roomId');
+      history.push(`/`);
+    }
+  };
+
+  const requestMemeUrl = (): Promise<string> => {
+    console.log('RM');
+    return new Promise<string>((resolve, reject) => {
+      if (socketRef.current.connected)
+        socketRef.current.emit(REQUEST_MEME_EVENT, {}, (data: string) => {
+          resolve(data);
+        });
+      else reject();
+    });
   };
 
   const startGame = (maxWinPoints?: number): void => {
@@ -142,6 +170,7 @@ const useConnection = (roomId: string): SocketConnection => {
     confirmCard,
     confirmMeme,
     tradeInWin,
+    requestMemeUrl,
   };
 };
 
