@@ -1,18 +1,18 @@
-import Cookies from 'js-cookie';
 import { useState, useEffect } from 'react';
 import { Player } from '../interfaces/api';
+import Cookies from 'js-cookie';
 
-export function useIsHost(players: Player[]): boolean {
-  const [isHost, setIsHost] = useState(false);
+export function useGetPlayerFromPlayerData(players: Player[]): Player {
+  const [player, setPlayer] = useState(null);
 
   useEffect(() => {
     if (players.length > 0) {
       const player = players.filter((player) => player.username === Cookies.get('userName'))[0];
       if (player) {
-        setIsHost(player.host);
+        setPlayer(player);
       }
     }
   }, [players]);
 
-  return isHost;
+  return player;
 }

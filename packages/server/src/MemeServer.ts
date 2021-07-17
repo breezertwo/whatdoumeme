@@ -206,7 +206,6 @@ export class MemeServer {
         if (game) {
           const result = game.setWinningCard(data.cardId);
           emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT, { winner: result.winner });
-          this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
 
           if (result.hasRoundEnded) {
             game.startNewRound();
@@ -216,6 +215,8 @@ export class MemeServer {
           } else {
             this.io.to(game.id).emit(MemeServer.GET_ROUNDEND_EVENT);
           }
+
+          this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
         }
       });
 
