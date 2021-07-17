@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import Cookies from 'js-cookie';
 import { Button, TextField } from '@material-ui/core';
@@ -43,8 +43,8 @@ export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.
   const classes = useStyles();
   const isHost = useIsHost(players);
 
-  const handleInputChange = (event) => {
-    setMaxPoints(event.target.value);
+  const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    setMaxPoints(parseInt((event.target as HTMLInputElement).value));
   };
 
   return (

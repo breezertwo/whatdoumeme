@@ -5,12 +5,18 @@ import PersonIcon from '@material-ui/icons/Person';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import { Player } from '../../interfaces/api';
 
+import CrownSolid from '../../assets/svg/crown-solid.svg';
+
 const useStyles = makeStyles(() =>
   createStyles({
     item: {
       backgroundColor: '#feffed',
       margin: '5px 0;',
       minWidth: 250,
+    },
+    itemCzar: {
+      backgroundColor: '#685c77',
+      margin: '5px 0;',
     },
     itemHost: {
       backgroundColor: '#f0c348',
@@ -21,6 +27,13 @@ const useStyles = makeStyles(() =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       flexGrow: 1,
+    },
+    nameContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      flexGrow: 0.05,
+      alignItems: 'center',
     },
     spacing: {
       margin: 5,
@@ -41,11 +54,20 @@ export const PlayerList = ({ players, includeGameData = false }: PlayerListProps
       {players.map((player, i) => (
         <ListItem
           key={i}
-          className={player.host && !includeGameData ? classes.itemHost : classes.item}>
+          className={
+            player.host && !includeGameData
+              ? classes.itemHost
+              : player.isCzar && includeGameData
+              ? classes.itemCzar
+              : classes.item
+          }>
           <div className={classes.listItemContainer}>
-            {player.username}
+            <div className={classes.nameContainer}>
+              {player.isCzar && includeGameData && <CrownSolid />}
+              {player.host && !includeGameData && <PersonIcon />}
+              {player.username}
+            </div>
             {includeGameData ? <p>Score: {player.score}</p> : null}
-            {player.host && !includeGameData ? <PersonIcon /> : null}
           </div>
         </ListItem>
       ))}
