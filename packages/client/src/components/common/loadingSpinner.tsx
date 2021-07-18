@@ -18,6 +18,10 @@ const useStyles = makeStyles({
       margin: 10,
     },
   },
+  memeContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
 });
 
 const LoadingSpinner = ({ msg, requestMemeUrl }: LoadingProps): JSX.Element => {
@@ -42,7 +46,7 @@ const LoadingSpinner = ({ msg, requestMemeUrl }: LoadingProps): JSX.Element => {
         <h1>{msg}</h1>
         <div className="loader"></div>
         {memeURL && (
-          <div>
+          <div className={classes.memeContainer}>
             <p> Random reddit meme: </p>
             <img style={{ width: '100%' }} src={memeURL}></img>
           </div>

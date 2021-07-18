@@ -17,7 +17,6 @@ export const GameView = ({
   roundData,
   onConfirmClicked,
   onCardClicked,
-  onLeaveClick,
   requestMemeUrl,
 }: GameViewProps): JSX.Element => {
   const { currentMeme, playerCards, serverState } = roundData;
@@ -37,7 +36,6 @@ export const GameView = ({
         onConfirmClicked={
           !czarIsSelecting || (czarIsSelecting && roundData.isCzar) ? onConfirmClicked : null
         }
-        onLeaveClick={onLeaveClick}
       />
     </div>
   ) : (

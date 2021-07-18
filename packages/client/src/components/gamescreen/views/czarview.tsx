@@ -18,7 +18,6 @@ export const CzarView = ({
   roundData,
   onConfirmClicked,
   onCardClicked,
-  onLeaveClick,
   requestMemeUrl,
 }: CzarViewProps): JSX.Element => {
   const classes = useMainContianerStyles();
@@ -32,7 +31,7 @@ export const CzarView = ({
           playerCards={roundData.memeCards}
           isCzar={roundData.isCzar}
         />
-        <ButtonContainer onConfirmClicked={onConfirmClicked} onLeaveClick={onLeaveClick} />
+        <ButtonContainer onConfirmClicked={onConfirmClicked} />
       </>
     </div>
   ) : (
