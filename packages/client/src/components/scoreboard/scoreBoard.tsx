@@ -12,7 +12,7 @@ export const ScoreBoard = ({ playerData }: ScoreBoardProps): JSX.Element => {
 
   return (
     <div className={classes.mainContainer}>
-      <PlayerList players={playerData} includeGameData={true} />
+      <PlayerList players={playerData} includeGameData={true} includeCzar={true} />
     </div>
   );
 };

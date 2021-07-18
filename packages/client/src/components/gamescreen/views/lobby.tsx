@@ -85,7 +85,7 @@ export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.
           />
         </div>
       )}
-      <PlayerList players={players} />
+      <PlayerList players={players} includeHost={true} />
     </div>
   );
 };

@@ -44,33 +44,42 @@ const useStyles = makeStyles(() =>
 export interface PlayerListProps {
   players: Player[];
   includeGameData?: boolean;
+  includeCzar?: boolean;
+  includeHost?: boolean;
 }
 
-export const PlayerList = ({ players, includeGameData = false }: PlayerListProps): JSX.Element => {
+export const PlayerList = ({
+  players,
+  includeGameData = false,
+  includeCzar = false,
+  includeHost = false,
+}: PlayerListProps): JSX.Element => {
   const classes = useStyles();
 
   return (
     <List className={classes.spacing} component="nav">
-      {players.map((player, i) => (
-        <ListItem
-          key={i}
-          className={
-            player.host && !includeGameData
-              ? classes.itemHost
-              : player.isCzar && includeGameData
-              ? classes.itemCzar
-              : classes.item
-          }>
-          <div className={classes.listItemContainer}>
-            <div className={classes.nameContainer}>
-              {player.isCzar && includeGameData && <CrownSolid />}
-              {player.host && !includeGameData && <PersonIcon />}
-              {player.username}
+      {players
+        .sort((a, b) => b.score - a.score)
+        .map((player, i) => (
+          <ListItem
+            key={i}
+            className={
+              player.host && includeHost
+                ? classes.itemHost
+                : player.isCzar && includeCzar
+                ? classes.itemCzar
+                : classes.item
+            }>
+            <div className={classes.listItemContainer}>
+              <div className={classes.nameContainer}>
+                {player.isCzar && includeCzar && <CrownSolid />}
+                {player.host && includeHost && <PersonIcon />}
+                {player.username}
+              </div>
+              {includeGameData && <p>Score: {player.score}</p>}
             </div>
-            {includeGameData ? <p>Score: {player.score}</p> : null}
-          </div>
-        </ListItem>
-      ))}
+          </ListItem>
+        ))}
     </List>
   );
 };
