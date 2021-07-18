@@ -4,7 +4,6 @@ import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
 import Cookies from 'js-cookie';
 import { useHistory } from 'react-router-dom';
 import { RoundData, Player, STATES } from '../interfaces/api';
-import { rejects } from 'node:assert';
 
 const GAME_RECIVE_LISTENER = 'sendGame';
 const NEW_ROUND_LISTENER = 'newRound';
