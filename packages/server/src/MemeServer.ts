@@ -51,10 +51,14 @@ export class MemeServer {
 
     this._app.use(express.static(path.join(__dirname, 'public')));
 
+    this._app.get('/join', (req, res) => {
+      return this.joinGameLink(req, res);
+    });
+
     this.activeGames = new Map();
 
-    this.initDb();
-    void this.initSocket(); // don't need to wait rn
+    void this.initDb(); // don't need to wait rn
+    this.initSocket();
     this.listen();
   }
 
@@ -272,5 +276,18 @@ export class MemeServer {
     const game = this.activeGames.get(roomId as string);
 
     return { user, game, roomId };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private joinGameLink(req: any, res: any): any {
+    const gameId = req.query.id as string;
+    const game = this.activeGames.get(gameId.toUpperCase());
+    if (game) {
+      res.cookie('roomId', gameId);
+      res.redirect(302, 'http://localhost:8080/');
+    } else {
+      res.sendStatus(404);
+    }
+    return res;
   }
 }

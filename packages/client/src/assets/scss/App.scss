@@ -54,32 +54,12 @@ h1 {
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 .page-header {
   display: flex;
-  background: var(--main-white-color);
-}
-.page-header nav {
-  display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
-  align-items: center;
-}
+  background: var(--main-white-color);
 
-.page-header ul {
-  display: flex;
-  order: 1;
-  width: 100%;
-  margin-top: 15px;
-}
-
-.page-header ul li:not(:last-child) {
-  padding-right: 15px;
-}
-
-.page-header .cta-contact {
-  font-family: inherit;
-  font-size: 1.2rem;
-  padding: 5px 18px;
-  border: 1px solid;
-  border-radius: 5px;
+  > * {
+    align-self: center;
+  }
 }
 
 /* MAIN

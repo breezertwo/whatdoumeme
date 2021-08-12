@@ -21,7 +21,7 @@ module.exports = merge(commonConfig, {
   },
   entry: [
     'react-hot-loader/patch', // activate HMR for React
-    'webpack-dev-server/client?http://localhost:8080', // bundle the client for webpack-dev-server and connect to the provided endpoint
+    'webpack-dev-server/client?http://localhost:3030', // bundle the client for webpack-dev-server and connect to the provided endpoint
     'webpack/hot/only-dev-server', // bundle the client for hot reloading
     './index.tsx',
   ],
