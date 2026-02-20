@@ -1,5 +1,3 @@
-import React from 'react';
-import { hot } from 'react-hot-loader';
 import { Switch, Route, MemoryRouter } from 'react-router-dom';
 
 import Home from './gamescreen/mainView';
@@ -24,6 +22,4 @@ const App = (): JSX.Element => {
   );
 };
 
-declare let module: Record<string, unknown>;
-
-export default hot(module)(App);
+export default App;

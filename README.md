@@ -1,8 +1,3 @@
 # whatdoumeme
 
-A memegame
-
-A new entry to my mini-game collection.
-This one is for playing the game ["What Do You Meme®"](https://whatdoyoumeme.com/) with your own custom cards and memes.
-
-_under construction_
+This is a simple server & client to playing a version of ["What Do You Meme®"](https://whatdoyoumeme.com/) with your own custom cards and memes.

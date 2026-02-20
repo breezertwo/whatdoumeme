@@ -2,20 +2,21 @@
 
 import express from 'express';
 import path from 'path';
-import cookie from 'cookie';
+import * as cookie from 'cookie';
 import { Server, Socket } from 'socket.io';
 import { createServer, Server as HttpServer } from 'http';
 import cors from 'cors';
-import { Db } from 'mongodb';
 
 import Game, { STATES } from './Game';
 import * as Utils from './utils';
-import { MongoDb, User } from './db';
+import { AppDatabase, User } from './db';
+
 interface UserData {
   user: User;
   game: Game;
   roomId: string;
 }
+
 export class MemeServer {
   private static readonly GAME_RECEIVE_EVENT: string = 'sendGame';
   private static readonly NEW_ROUND_EVENT: string = 'newRound';
@@ -39,14 +40,15 @@ export class MemeServer {
   private _port: string | number;
 
   private io: Server;
-  private db: Db;
+  private db: AppDatabase;
 
   private activeGames: Map<string, Game>;
+
   constructor() {
     this._app = express();
     this._port = process.env.PORT || MemeServer.PORT;
     this._app.use(cors());
-    this._app.options('*', cors());
+
     this._server = createServer(this._app);
 
     this._app.use(express.static(path.join(__dirname, 'public')));
@@ -57,7 +59,7 @@ export class MemeServer {
 
     this.activeGames = new Map();
 
-    void this.initDb(); // don't need to wait rn
+    this.db = new AppDatabase();
     this.initSocket();
     this.listen();
   }
@@ -70,23 +72,17 @@ export class MemeServer {
     this.io = new Server(this._server);
   }
 
-  private async initDb(): Promise<void> {
-    const mongo = new MongoDb();
-    await mongo.connect();
-    this.db = mongo.getDb();
-  }
-
   private listen(): void {
     this._server.listen(this._port, () => {
       console.log('[MS] Running server on port %s', this._port);
     });
 
-    this.io.on(MemeServer.ON_CONNECTION_LISTENER, async (socket: Socket) => {
+    this.io.on(MemeServer.ON_CONNECTION_LISTENER, (socket: Socket) => {
       console.log(`[MS] ${socket.id} connected on port ${this._port}.`);
 
       let game;
-      const cookies = cookie.parse(socket.handshake.headers.cookie);
-      const userDb = await this.getUser(cookies.userName);
+      const cookies = cookie.parse(socket.handshake.headers.cookie || '');
+      const userDb = this.getUser(cookies.userName);
 
       if (userDb) {
         const username = userDb.username;
@@ -111,9 +107,7 @@ export class MemeServer {
                 playerData: game.getFrontendPlayerData(),
               });
 
-              socket.broadcast
-                .to(game.id)
-                .emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
+              socket.broadcast.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
 
               break;
             case STATES.STARTED:
@@ -122,8 +116,7 @@ export class MemeServer {
               const player = game.getPlayerByName(username);
 
               if (player.length) {
-                if (!player[0].hasCommitted)
-                  socket.emit(MemeServer.NEW_ROUND_EVENT, game.getRound(username));
+                if (!player[0].hasCommitted) socket.emit(MemeServer.NEW_ROUND_EVENT, game.getRound(username));
                 else {
                   socket.emit(MemeServer.NEW_ROUND_EVENT, {
                     ...game.getRound(username),
@@ -141,8 +134,8 @@ export class MemeServer {
         }
       }
 
-      socket.on(MemeServer.ON_LEAVEGAME_LISTENER, async (data, callback) => {
-        const { user, game } = await this.getUserData(data);
+      socket.on(MemeServer.ON_LEAVEGAME_LISTENER, (data, callback) => {
+        const { user, game } = this.getUserData(data);
 
         if (user) {
           if (game) {
@@ -161,8 +154,8 @@ export class MemeServer {
         }
       });
 
-      socket.on(MemeServer.ON_STARTGAME_LISTENER, async (data) => {
-        const { game } = await this.getUserData(data);
+      socket.on(MemeServer.ON_STARTGAME_LISTENER, (data) => {
+        const { game } = this.getUserData(data);
 
         if (game) {
           game.initGame(data.maxWinPoints);
@@ -172,8 +165,8 @@ export class MemeServer {
         }
       });
 
-      socket.on(MemeServer.ON_TRADEINCARD_LISTENER, async (data) => {
-        const { user, game } = await this.getUserData(data);
+      socket.on(MemeServer.ON_TRADEINCARD_LISTENER, (data) => {
+        const { user, game } = this.getUserData(data);
 
         if (game) {
           const opState = game.renewPlayerCards(user.username);
@@ -184,8 +177,8 @@ export class MemeServer {
         }
       });
 
-      socket.on(MemeServer.ON_MEMESELECTED_LISTENER, async (data) => {
-        const { game } = await this.getUserData(data);
+      socket.on(MemeServer.ON_MEMESELECTED_LISTENER, (data) => {
+        const { game } = this.getUserData(data);
 
         if (game) {
           game.setSelectedMeme(data.cardId);
@@ -193,8 +186,8 @@ export class MemeServer {
         }
       });
 
-      socket.on(MemeServer.ON_CARDSELECTCONFIRM_LISTENER, async (data, callback) => {
-        const { user, game } = await this.getUserData(data);
+      socket.on(MemeServer.ON_CARDSELECTCONFIRM_LISTENER, (data, callback) => {
+        const { user, game } = this.getUserData(data);
 
         if (game) {
           game.setSelectedPlayerCard(user.username, data.cardId);
@@ -202,13 +195,13 @@ export class MemeServer {
             callback('');
             emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
           } else {
-            callback(await Utils.getRandomRedditMeme(this.db));
+            callback(Utils.getRandomRedditMeme(this.db));
           }
         }
       });
 
-      socket.on(MemeServer.ON_WINNERCONFIRM_LISTENER, async (data) => {
-        const { game } = await this.getUserData(data);
+      socket.on(MemeServer.ON_WINNERCONFIRM_LISTENER, (data) => {
+        const { game } = this.getUserData(data);
 
         if (game) {
           const result = game.setWinningCard(data.cardId);
@@ -227,19 +220,15 @@ export class MemeServer {
         }
       });
 
-      socket.on(MemeServer.ON_REQUEST_MEME, async (_data, callback) => {
-        callback(await Utils.getRandomRedditMeme(this.db));
+      socket.on(MemeServer.ON_REQUEST_MEME, (_data, callback) => {
+        callback(Utils.getRandomRedditMeme(this.db));
       });
 
       socket.on(MemeServer.ON_DSICONNECT_LISTENER, function () {
         console.log(`[MS] ${socket.id} disconnected`);
       });
 
-      const emitRoundToAllPlayersInGame = (
-        game: Game,
-        event: string,
-        extRoundData?: Record<string, unknown>
-      ): void => {
+      const emitRoundToAllPlayersInGame = (game: Game, event: string, extRoundData?: Record<string, unknown>): void => {
         for (const player of game.players) {
           if (player.socketId == socket.id)
             socket.emit(event, {
@@ -256,22 +245,13 @@ export class MemeServer {
     });
   }
 
-  // Just a barebones MonogoDB Test for potential user data storage in future
-  private async getUser(username: string): Promise<User> {
-    const coll = this.db.collection('users');
-    let user = await coll.findOne<User>({ username });
-    if (!user) {
-      const newUser = {
-        username,
-      };
-      user = (await coll.insert(newUser)).ops[0];
-    }
-    return user;
+  private getUser(username: string): User {
+    return this.db.getOrCreateUser(username);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async getUserData(data: any): Promise<UserData> {
-    const user = data.senderId ? await this.getUser(data.senderId) : undefined;
+  private getUserData(data: any): UserData {
+    const user = data.senderId ? this.getUser(data.senderId) : undefined;
     const roomId = data.roomId || undefined;
     const game = this.activeGames.get(roomId as string);
 

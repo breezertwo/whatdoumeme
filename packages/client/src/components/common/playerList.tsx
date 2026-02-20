@@ -5,7 +5,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import { Player } from '../../interfaces/api';
 
-import CrownSolid from '../../assets/svg/crown-solid.svg';
+import CrownSolid from '../../assets/svg/crown-solid.svg?react';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -63,13 +63,8 @@ export const PlayerList = ({
         .map((player, i) => (
           <ListItem
             key={i}
-            className={
-              player.host && includeHost
-                ? classes.itemHost
-                : player.isCzar && includeCzar
-                ? classes.itemCzar
-                : classes.item
-            }>
+            className={player.host && includeHost ? classes.itemHost : player.isCzar && includeCzar ? classes.itemCzar : classes.item}
+          >
             <div className={classes.listItemContainer}>
               <div className={classes.nameContainer}>
                 {player.isCzar && includeCzar && <CrownSolid />}

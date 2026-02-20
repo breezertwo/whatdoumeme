@@ -1,5 +1,4 @@
-import { Db } from 'mongodb';
-import { RedditMeme } from '../db';
+import { AppDatabase } from '../db';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const ID_LENGTH = 6;
@@ -29,15 +28,8 @@ function generate(): string {
   return rtn;
 }
 
-export const getRandomRedditMeme = async (db: Db): Promise<string> => {
-  const randomMeme = (
-    await db
-      .collection('redditPosts')
-      .aggregate<RedditMeme>([{ $sample: { size: 1 } }])
-      .toArray()
-  )[0];
-
-  return randomMeme.url;
+export const getRandomRedditMeme = (db: AppDatabase): string | undefined => {
+  return db.getRandomRedditMeme();
 };
 
 export const getRandomElementsNonDestructive = <T>(arr: Array<T>, n: number): Array<T> => {
