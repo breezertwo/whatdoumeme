@@ -3,7 +3,7 @@ dist/
 outDir/
 node_modules/
 
-packages/client/assets/
+packages/client/public/assets/memes
 packages/server/tools/*
 !packages/server/tools/deckIntake.js
 

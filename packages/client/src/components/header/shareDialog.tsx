@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import Cookies from 'js-cookie';
 
-import { SOCKET_SERVER_URL } from '../../hooks/useConnection';
+import { SOCKET_SERVER_URL } from '../../socket/SocketProvider';
 
 const LinkIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

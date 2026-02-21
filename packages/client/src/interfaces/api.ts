@@ -1,4 +1,6 @@
-// Serverstates
+// Server game states — LOADING and END are client-only values not present
+// in the server's STATES enum (END is triggered by the roundEnd event,
+// LOADING is the initial state while awaiting the first sendGame event).
 export enum STATES {
   LOADING = -1,
   WAITING = 0,
@@ -10,23 +12,21 @@ export enum STATES {
   END = 6,
 }
 
-// TODO: Type API
-
-export interface RoundData {
-  isCzar?: boolean;
-  playerCards?: any[];
-  memeCards?: any[];
-  currentMeme?: string;
-  currentCzar?: string;
-  serverState?: number;
-  randomMeme?: string;
-  winner?: string;
-}
-
-export interface Player {
-  username: string;
-  host: boolean;
-  score: number;
-  tradeOptions: number;
-  isCzar: boolean;
-}
+export type {
+  /**
+   * @deprecated Use export from '../socket/events';
+   */
+  Player,
+  /**
+   * @deprecated Use export from '../socket/events';
+   */
+  RoundPayload as RoundData,
+  /**
+   * @deprecated Use export from '../socket/events';
+   */
+  WhiteCard,
+  /**
+   * @deprecated Use export from '../socket/events';
+   */
+  MemeCard,
+} from '../socket/events';

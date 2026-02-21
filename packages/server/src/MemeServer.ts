@@ -12,9 +12,9 @@ import * as Utils from './utils';
 import { AppDatabase, User } from './db';
 
 interface UserData {
-  user: User;
-  game: Game;
-  roomId: string;
+  user: User | undefined;
+  game: Game | undefined;
+  roomId: string | undefined;
 }
 
 export class MemeServer {
@@ -99,6 +99,13 @@ export class MemeServer {
           game.joinGame(username, socket.id);
           socket.join(game.id);
 
+          // Store identity on the socket so handlers never need senderId in payloads.
+          // This is the single point where the server learns who this socket is.
+          // When auth is added, this is where the verified token populates socket.data
+          // instead of trusting a cookie value.
+          socket.data.username = username;
+          socket.data.roomId = game.id;
+
           switch (game.state) {
             case STATES.WAITING:
               socket.emit(MemeServer.GAME_RECEIVE_EVENT, {
@@ -134,8 +141,8 @@ export class MemeServer {
         }
       }
 
-      socket.on(MemeServer.ON_LEAVEGAME_LISTENER, (data, callback) => {
-        const { user, game } = this.getUserData(data);
+      socket.on(MemeServer.ON_LEAVEGAME_LISTENER, (_data, callback) => {
+        const { user, game } = this.getSocketUserData(socket);
 
         if (user) {
           if (game) {
@@ -155,7 +162,7 @@ export class MemeServer {
       });
 
       socket.on(MemeServer.ON_STARTGAME_LISTENER, (data) => {
-        const { game } = this.getUserData(data);
+        const { game } = this.getSocketUserData(socket);
 
         if (game) {
           game.initGame(data.maxWinPoints);
@@ -165,10 +172,10 @@ export class MemeServer {
         }
       });
 
-      socket.on(MemeServer.ON_TRADEINCARD_LISTENER, (data) => {
-        const { user, game } = this.getUserData(data);
+      socket.on(MemeServer.ON_TRADEINCARD_LISTENER, (_data) => {
+        const { user, game } = this.getSocketUserData(socket);
 
-        if (game) {
+        if (user && game) {
           const opState = game.renewPlayerCards(user.username);
           if (opState) {
             socket.emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
@@ -178,7 +185,7 @@ export class MemeServer {
       });
 
       socket.on(MemeServer.ON_MEMESELECTED_LISTENER, (data) => {
-        const { game } = this.getUserData(data);
+        const { game } = this.getSocketUserData(socket);
 
         if (game) {
           game.setSelectedMeme(data.cardId);
@@ -187,9 +194,9 @@ export class MemeServer {
       });
 
       socket.on(MemeServer.ON_CARDSELECTCONFIRM_LISTENER, (data, callback) => {
-        const { user, game } = this.getUserData(data);
+        const { user, game } = this.getSocketUserData(socket);
 
-        if (game) {
+        if (user && game) {
           game.setSelectedPlayerCard(user.username, data.cardId);
           if (game.state === STATES.ANSWERS) {
             callback('');
@@ -201,7 +208,7 @@ export class MemeServer {
       });
 
       socket.on(MemeServer.ON_WINNERCONFIRM_LISTENER, (data) => {
-        const { game } = this.getUserData(data);
+        const { game } = this.getSocketUserData(socket);
 
         if (game) {
           const result = game.setWinningCard(data.cardId);
@@ -249,12 +256,16 @@ export class MemeServer {
     return this.db.getOrCreateUser(username);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private getUserData(data: any): UserData {
-    const user = data.senderId ? this.getUser(data.senderId) : undefined;
-    const roomId = data.roomId || undefined;
-    const game = this.activeGames.get(roomId as string);
-
+  /**
+   * Resolves user and game from the socket's own identity stored at connection time.
+   * No payload field is needed. When auth is added, socket.data will be populated
+   * from the verified session token instead of a cookie username.
+   */
+  private getSocketUserData(socket: Socket): UserData {
+    const username = socket.data.username as string | undefined;
+    const roomId = socket.data.roomId as string | undefined;
+    const game = roomId ? this.activeGames.get(roomId) : undefined;
+    const user = username ? this.getUser(username) : undefined;
     return { user, game, roomId };
   }
 

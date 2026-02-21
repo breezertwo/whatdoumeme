@@ -1,11 +1,11 @@
 import { Routes, Route, MemoryRouter } from 'react-router-dom';
 
-import Home from './gamescreen/mainView';
-import { PageHeader } from './header';
-import Login from './login/login';
-import { UsernameProvider } from '../context/username';
+import { PageHeader } from './components/header';
+import Login from './components/login/login';
+import { UsernameProvider } from './context/username';
 
-import './../assets/scss/App.scss';
+import './assets/scss/App.scss';
+import { Home } from './screens/Home';
 
 const App = () => {
   return (
