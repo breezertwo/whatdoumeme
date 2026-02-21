@@ -22,7 +22,6 @@ export const SocketProvider = ({ roomId, children }: SocketProviderProps) => {
     console.log('SocketProvider: Connecting');
     socketService.connect(SOCKET_SERVER_URL, {
       roomId,
-      // auth: { token: authToken }
     });
     console.log('SocketProvider: Connected');
     return () => {

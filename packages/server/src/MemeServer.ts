@@ -7,32 +7,13 @@ import { Server, Socket } from 'socket.io';
 import { createServer, Server as HttpServer } from 'http';
 import cors from 'cors';
 
-import Game, { STATES } from './Game';
-import * as Utils from './utils';
-import { AppDatabase, User } from './db';
-
-interface UserData {
-  user: User | undefined;
-  game: Game | undefined;
-  roomId: string | undefined;
-}
+import { STATES } from './Game';
+import { AppDatabase } from './db';
+import { GameRoomManager } from './GameRoomManager';
+import { GameSocketHandler } from './socket/GameSocketHandler';
+import { ServerEvent } from './socket/events';
 
 export class MemeServer {
-  private static readonly GAME_RECEIVE_EVENT: string = 'sendGame';
-  private static readonly NEW_ROUND_EVENT: string = 'newRound';
-  private static readonly GET_PLAYER_EVENT: string = 'playerData';
-  private static readonly GET_ROUNDEND_EVENT: string = 'roundEnd';
-
-  private static readonly ON_CONNECTION_LISTENER: string = 'connection';
-  private static readonly ON_DSICONNECT_LISTENER: string = 'disconnect';
-  private static readonly ON_LEAVEGAME_LISTENER: string = 'leaveGame';
-  private static readonly ON_STARTGAME_LISTENER: string = 'startGame';
-  private static readonly ON_MEMESELECTED_LISTENER: string = 'confirmMeme';
-  private static readonly ON_CARDSELECTCONFIRM_LISTENER: string = 'confirmSelection';
-  private static readonly ON_WINNERCONFIRM_LISTENER: string = 'confirmSelectionWinner';
-  private static readonly ON_TRADEINCARD_LISTENER: string = 'tradeInCard';
-  private static readonly ON_REQUEST_MEME: string = 'requestMeme';
-
   private static readonly PORT: number = 3030;
 
   private _app: express.Application;
@@ -41,8 +22,7 @@ export class MemeServer {
 
   private io: Server;
   private db: AppDatabase;
-
-  private activeGames: Map<string, Game>;
+  private rooms: GameRoomManager;
 
   constructor() {
     this._app = express();
@@ -50,17 +30,13 @@ export class MemeServer {
     this._app.use(cors());
 
     this._server = createServer(this._app);
-
     this._app.use(express.static(path.join(__dirname, 'public')));
-
-    this._app.get('/join', (req, res) => {
-      return this.joinGameLink(req, res);
-    });
-
-    this.activeGames = new Map();
+    this._app.get('/join', (req, res) => this.joinGameLink(req, res));
 
     this.db = new AppDatabase();
-    this.initSocket();
+    this.rooms = new GameRoomManager();
+    this.io = new Server(this._server);
+
     this.listen();
   }
 
@@ -68,217 +44,82 @@ export class MemeServer {
     return this._app;
   }
 
-  private initSocket(): void {
-    this.io = new Server(this._server);
-  }
-
   private listen(): void {
     this._server.listen(this._port, () => {
       console.log('[MS] Running server on port %s', this._port);
     });
 
-    this.io.on(MemeServer.ON_CONNECTION_LISTENER, (socket: Socket) => {
+    this.io.on('connection', (socket: Socket) => {
       console.log(`[MS] ${socket.id} connected on port ${this._port}.`);
 
-      let game;
-      const cookies = cookie.parse(socket.handshake.headers.cookie || '');
-      const userDb = this.getUser(cookies.userName);
+      // ── Identity resolution ────────────────────────────────────────────────
+      // Read the caller's identity from cookies / handshake query.
+      // Auth integration point: replace the cookie lookup with a verified token
+      // check on socket.handshake.auth.token. socket.data stays the same shape.
+      const cookies  = cookie.parse(socket.handshake.headers.cookie || '');
+      const userDb   = this.db.getOrCreateUser(cookies.userName);
+      if (!userDb) return;
 
-      if (userDb) {
-        const username = userDb.username;
-        const roomId = cookies.roomId || (socket.handshake.query.roomId as string);
+      const username = userDb.username;
+      const roomId   = cookies.roomId || (socket.handshake.query.roomId as string);
 
-        if (roomId === ':create') {
-          game = new Game(username);
-          this.activeGames.set(game.id, game);
-        } else if (roomId) {
-          game = this.activeGames.get(roomId.toUpperCase());
-        }
+      // ── Room resolution ────────────────────────────────────────────────────
+      const game = roomId === ':create'
+        ? this.rooms.createRoom(username)
+        : this.rooms.findRoom(roomId);
 
-        if (game) {
-          game.joinGame(username, socket.id);
-          socket.join(game.id);
+      if (!game) return;
 
-          // Store identity on the socket so handlers never need senderId in payloads.
-          // This is the single point where the server learns who this socket is.
-          // When auth is added, this is where the verified token populates socket.data
-          // instead of trusting a cookie value.
-          socket.data.username = username;
-          socket.data.roomId = game.id;
+      game.joinGame(username, socket.id);
+      socket.join(game.id);
 
-          switch (game.state) {
-            case STATES.WAITING:
-              socket.emit(MemeServer.GAME_RECEIVE_EVENT, {
-                id: game.id,
-                state: game.state,
-                playerData: game.getFrontendPlayerData(),
-              });
+      // Bind identity to the socket — GameSocketHandler reads from socket.data.
+      socket.data.username = username;
+      socket.data.roomId   = game.id;
 
-              socket.broadcast.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
+      // ── Initial state emission ─────────────────────────────────────────────
+      switch (game.state) {
+        case STATES.WAITING:
+          socket.emit(ServerEvent.SEND_GAME, {
+            id: game.id,
+            state: game.state,
+            playerData: game.getFrontendPlayerData(),
+          });
+          socket.broadcast.to(game.id).emit(ServerEvent.PLAYER_DATA, game.getFrontendPlayerData());
+          break;
 
-              break;
-            case STATES.STARTED:
-            case STATES.ANSWERS:
-            case STATES.MEMELORD:
-              const player = game.getPlayerByName(username);
-
-              if (player.length) {
-                if (!player[0].hasCommitted) socket.emit(MemeServer.NEW_ROUND_EVENT, game.getRound(username));
-                else {
-                  socket.emit(MemeServer.NEW_ROUND_EVENT, {
-                    ...game.getRound(username),
-                    serverState: STATES.COMITTED,
-                  });
-                }
-
-                socket.emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
-              }
-              break;
-            default:
-              console.log('[S] Connection error');
-              break;
+        case STATES.STARTED:
+        case STATES.ANSWERS:
+        case STATES.MEMELORD: {
+          const [player] = game.getPlayerByName(username);
+          if (player) {
+            socket.emit(ServerEvent.NEW_ROUND, player.hasCommitted
+              ? { ...game.getRound(username), serverState: STATES.COMITTED }
+              : game.getRound(username),
+            );
+            socket.emit(ServerEvent.PLAYER_DATA, game.getFrontendPlayerData());
           }
+          break;
         }
+
+        default:
+          console.log('[MS] Connection during unexpected game state');
       }
 
-      socket.on(MemeServer.ON_LEAVEGAME_LISTENER, (_data, callback) => {
-        const { user, game } = this.getSocketUserData(socket);
-
-        if (user) {
-          if (game) {
-            game.leaveGame(user.username);
-            socket.leave(game.id);
-            callback(true);
-
-            this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
-
-            if (game.players.length === 0) {
-              this.activeGames.delete(game.id);
-            }
-          } else {
-            callback(false);
-          }
-        }
-      });
-
-      socket.on(MemeServer.ON_STARTGAME_LISTENER, (data) => {
-        const { game } = this.getSocketUserData(socket);
-
-        if (game) {
-          game.initGame(data.maxWinPoints);
-
-          this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
-          emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
-        }
-      });
-
-      socket.on(MemeServer.ON_TRADEINCARD_LISTENER, (_data) => {
-        const { user, game } = this.getSocketUserData(socket);
-
-        if (user && game) {
-          const opState = game.renewPlayerCards(user.username);
-          if (opState) {
-            socket.emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
-            socket.emit(MemeServer.NEW_ROUND_EVENT, game.getRound(user.username));
-          }
-        }
-      });
-
-      socket.on(MemeServer.ON_MEMESELECTED_LISTENER, (data) => {
-        const { game } = this.getSocketUserData(socket);
-
-        if (game) {
-          game.setSelectedMeme(data.cardId);
-          emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
-        }
-      });
-
-      socket.on(MemeServer.ON_CARDSELECTCONFIRM_LISTENER, (data, callback) => {
-        const { user, game } = this.getSocketUserData(socket);
-
-        if (user && game) {
-          game.setSelectedPlayerCard(user.username, data.cardId);
-          if (game.state === STATES.ANSWERS) {
-            callback('');
-            emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
-          } else {
-            callback(Utils.getRandomRedditMeme(this.db));
-          }
-        }
-      });
-
-      socket.on(MemeServer.ON_WINNERCONFIRM_LISTENER, (data) => {
-        const { game } = this.getSocketUserData(socket);
-
-        if (game) {
-          const result = game.setWinningCard(data.cardId);
-          emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT, { winner: result.winner });
-
-          if (result.hasRoundEnded) {
-            game.startNewRound();
-            setTimeout(() => {
-              emitRoundToAllPlayersInGame(game, MemeServer.NEW_ROUND_EVENT);
-            }, 10000);
-          } else {
-            this.io.to(game.id).emit(MemeServer.GET_ROUNDEND_EVENT);
-          }
-
-          this.io.to(game.id).emit(MemeServer.GET_PLAYER_EVENT, game.getFrontendPlayerData());
-        }
-      });
-
-      socket.on(MemeServer.ON_REQUEST_MEME, (_data, callback) => {
-        callback(Utils.getRandomRedditMeme(this.db));
-      });
-
-      socket.on(MemeServer.ON_DSICONNECT_LISTENER, function () {
-        console.log(`[MS] ${socket.id} disconnected`);
-      });
-
-      const emitRoundToAllPlayersInGame = (game: Game, event: string, extRoundData?: Record<string, unknown>): void => {
-        for (const player of game.players) {
-          if (player.socketId == socket.id)
-            socket.emit(event, {
-              ...game.getRound(player.username),
-              ...extRoundData,
-            });
-          else
-            socket.to(player.socketId).emit(event, {
-              ...game.getRound(player.username),
-              ...extRoundData,
-            });
-        }
-      };
+      // ── Event listeners ────────────────────────────────────────────────────
+      new GameSocketHandler(socket, this.io, this.db, this.rooms).register();
     });
   }
 
-  private getUser(username: string): User {
-    return this.db.getOrCreateUser(username);
-  }
-
-  /**
-   * Resolves user and game from the socket's own identity stored at connection time.
-   * No payload field is needed. When auth is added, socket.data will be populated
-   * from the verified session token instead of a cookie username.
-   */
-  private getSocketUserData(socket: Socket): UserData {
-    const username = socket.data.username as string | undefined;
-    const roomId = socket.data.roomId as string | undefined;
-    const game = roomId ? this.activeGames.get(roomId) : undefined;
-    const user = username ? this.getUser(username) : undefined;
-    return { user, game, roomId };
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private joinGameLink(req: any, res: any): any {
+  private joinGameLink(req: any, res: any): void {
     const gameId = req.query.id as string;
-    const game = this.activeGames.get(gameId.toUpperCase());
+    const game   = this.rooms.findRoom(gameId);
     if (game) {
       res.cookie('roomId', gameId);
       res.redirect(302, 'http://localhost:8080/');
     } else {
       res.sendStatus(404);
     }
-    return res;
   }
 }
