@@ -1,40 +1,23 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Tabs } from '@base-ui/react/tabs';
 import useConnection from '../../hooks/useConnection';
 import LoadingSpinner from '../common/loadingSpinner';
 import { CzarView, GameView, Lobby, WinnerView, EndScreenView } from './views';
-import { TabBar, TabPanel } from './views/subviews';
+import { TabBar } from './views/subviews';
 import { STATES } from '../../interfaces/api';
 import { ScoreBoard } from '../scoreboard/scoreBoard';
 import { ActionsView } from '../actionmenue/actionmenue';
 
-interface ParamTypes {
-  roomId: string;
-}
-
-const Home = (): JSX.Element => {
+const Home = () => {
   const [selectedCardId, setSelectedCard] = useState<string>(null);
-  const [activeTabId, setActiveTab] = useState(0);
-  const { roomId } = useParams<ParamTypes>();
+  const { roomId } = useParams();
 
-  const {
-    roundData,
-    playersData,
-    serverState,
-    startGame,
-    leaveGame,
-    confirmCard,
-    confirmMeme,
-    tradeInWin,
-    requestMemeUrl,
-  } = useConnection(roomId);
+  const { roundData, playersData, serverState, startGame, leaveGame, confirmCard, confirmMeme, tradeInWin, requestMemeUrl } =
+    useConnection(roomId);
 
   const onCardClicked = (id: string): void => {
     setSelectedCard(id);
-  };
-
-  const handleTabChange = (tabId: number): void => {
-    setActiveTab(tabId);
   };
 
   const handleConfirmCard = (): void => {
@@ -47,7 +30,7 @@ const Home = (): JSX.Element => {
     setSelectedCard(null);
   };
 
-  const getViewByState = (): JSX.Element => {
+  const getViewByState = () => {
     switch (serverState) {
       case STATES.WAITING:
         return <Lobby players={playersData} onStartClick={startGame} onLeaveClick={leaveGame} />;
@@ -75,12 +58,7 @@ const Home = (): JSX.Element => {
       case STATES.WINNER:
         return <WinnerView roundData={roundData} />;
       case STATES.COMITTED:
-        return (
-          <LoadingSpinner
-            requestMemeUrl={requestMemeUrl}
-            msg={'Committed. Waiting for the others...'}
-          />
-        );
+        return <LoadingSpinner requestMemeUrl={requestMemeUrl} msg={'Committed. Waiting for the others...'} />;
       case STATES.END:
         return <EndScreenView playerData={playersData} onRestart={startGame} onLeave={leaveGame} />;
       case STATES.LOADING:
@@ -91,25 +69,18 @@ const Home = (): JSX.Element => {
   };
 
   return serverState !== STATES.END ? (
-    // This can be improved ... but I currently don't care
-    <>
-      <TabBar serverState={serverState} handleChange={handleTabChange} />
-      {activeTabId === 0 ? (
-        <TabPanel active={activeTabId} index={0}>
-          {getViewByState()}
-        </TabPanel>
-      ) : null}
-      {activeTabId === 1 ? (
-        <TabPanel active={activeTabId} index={1}>
-          <ScoreBoard playerData={playersData} />
-        </TabPanel>
-      ) : null}
-      {activeTabId === 2 ? (
-        <TabPanel active={activeTabId} index={2}>
-          <ActionsView playerData={playersData} onTradeIn={tradeInWin} onLeaveGame={leaveGame} />
-        </TabPanel>
-      ) : null}
-    </>
+    <Tabs.Root defaultValue={0}>
+      <TabBar serverState={serverState} />
+      <Tabs.Panel value={0} className="tab-panel">
+        {getViewByState()}
+      </Tabs.Panel>
+      <Tabs.Panel value={1} className="tab-panel">
+        <ScoreBoard playerData={playersData} />
+      </Tabs.Panel>
+      <Tabs.Panel value={2} className="tab-panel">
+        <ActionsView playerData={playersData} onTradeIn={tradeInWin} onLeaveGame={leaveGame} />
+      </Tabs.Panel>
+    </Tabs.Root>
   ) : (
     getViewByState()
   );

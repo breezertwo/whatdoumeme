@@ -8,3 +8,5 @@ packages/server/tools/*
 !packages/server/tools/deckIntake.js
 
 src/**/*.jsx
+
+.claude

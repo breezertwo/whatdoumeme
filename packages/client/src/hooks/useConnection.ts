@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import socketIOClient, { Socket } from 'socket.io-client';
-import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
 import Cookies from 'js-cookie';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { RoundData, Player, STATES } from '../interfaces/api';
 
 const GAME_RECIVE_LISTENER = 'sendGame';
@@ -18,7 +17,7 @@ const CONFIRM_SELECTION_EVENT = 'confirmSelection';
 const TRADEINCARD_EVENT = 'tradeInCard';
 const REQUEST_MEME_EVENT = 'requestMeme';
 
-const SOCKET_SERVER_URL = 'http://localhost:3030';
+export const SOCKET_SERVER_URL = 'http://localhost:3030';
 
 export interface SocketConnection {
   roundData: RoundData;
@@ -32,16 +31,15 @@ export interface SocketConnection {
   requestMemeUrl: () => Promise<string>;
 }
 
-const useConnection = (roomId: string): SocketConnection => {
+const useConnection = (roomId: string | undefined): SocketConnection => {
   const [roundData, setRoundData] = useState<RoundData>({});
   const [playersData, setPlayersData] = useState<Player[]>([]);
   const [serverState, setServerState] = useState(Cookies.get('roomId') ? -1 : 0);
 
-  const socketRef = useRef<Socket<DefaultEventsMap, DefaultEventsMap>>(null);
-  const history = useHistory();
+  const socketRef = useRef<Socket>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Creates a WebSocket connection
     socketRef.current = socketIOClient(SOCKET_SERVER_URL, {
       transports: ['websocket'],
       query: { roomId },
@@ -89,12 +87,12 @@ const useConnection = (roomId: string): SocketConnection => {
         (ack: boolean) => {
           if (ack) {
             Cookies.remove('roomId');
-            history.push(`/`);
+            navigate('/');
           } else {
             console.error('[SERVER ERROR] Lost game');
             console.error('[GAME] Reseting...');
             Cookies.remove('roomId');
-            history.push(`/`);
+            navigate('/');
           }
         }
       );
@@ -102,18 +100,19 @@ const useConnection = (roomId: string): SocketConnection => {
       console.error('[SERVER ERROR] No connection');
       console.error('[GAME] Reseting');
       Cookies.remove('roomId');
-      history.push(`/`);
+      navigate('/');
     }
   };
 
   const requestMemeUrl = (): Promise<string> => {
-    console.log('RM');
     return new Promise<string>((resolve, reject) => {
       if (socketRef.current.connected)
         socketRef.current.emit(REQUEST_MEME_EVENT, {}, (data: string) => {
           resolve(data);
         });
-      else reject();
+      else {
+        resolve('');
+      }
     });
   };
 
@@ -135,8 +134,7 @@ const useConnection = (roomId: string): SocketConnection => {
 
   const confirmCard = (cardId: string): void => {
     if (cardId) {
-      const EMIT_EVENT =
-        serverState === STATES.ANSWERS ? CONFIRM_WINNER_EVENT : CONFIRM_SELECTION_EVENT;
+      const EMIT_EVENT = serverState === STATES.ANSWERS ? CONFIRM_WINNER_EVENT : CONFIRM_SELECTION_EVENT;
 
       socketRef.current.emit(
         EMIT_EVENT,

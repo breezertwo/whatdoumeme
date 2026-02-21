@@ -2,35 +2,14 @@ import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react';
 import JoinGame from './joinGame';
 import Username from './username';
-import { makeStyles } from '@material-ui/core';
+import { useUsername } from '../../context/username';
 
-export const useLoginStyles = makeStyles({
-  loginContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    maxWidth: 500,
-  },
-  textInput: {
-    padding: '18px 12px',
-    borderRadius: 7,
-    fontSize: 24,
-    margin: '30px 0 10px 0',
-    '&:focus': {
-      outline: 'none',
-    },
-  },
-});
+const Login = () => {
+  const username = useUsername();
 
-const Login = (): JSX.Element => {
-  const [loggedin, setLoggedIn] = useState(false);
+  console.log('Username:', username);
 
-  useEffect(() => {
-    if (Cookies.get('userName')) {
-      setLoggedIn(true);
-    }
-  });
-
-  return loggedin ? <JoinGame /> : <Username />;
+  return username ? <JoinGame /> : <Username />;
 };
 
 export default Login;

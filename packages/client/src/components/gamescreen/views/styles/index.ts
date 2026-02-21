@@ -1,2 +1,1 @@
-export { mainTheme } from './muiTheme';
-export { useMainContianerStyles } from './sharedStyles';
+export { mainContainer, basicFlex } from './sharedStyles';

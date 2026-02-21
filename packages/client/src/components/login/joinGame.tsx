@@ -1,42 +1,35 @@
 import Cookies from 'js-cookie';
 import React, { ChangeEvent, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { CustomButton } from '../gamescreen/views/subviews';
-import { useLoginStyles } from './login';
 
-const JoinGame = (): JSX.Element => {
+const JoinGame = () => {
   const [roomName, setRoomName] = useState('');
-  const history = useHistory();
-  const classes = useLoginStyles();
+  const navigate = useNavigate();
 
-  const handleRoomNameChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+  const handleRoomNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setRoomName(event.target.value);
   };
 
   useEffect(() => {
     const c = Cookies.get('roomId');
     if (c) {
-      history.push(`room/${c}`);
+      navigate(`room/${c}`);
     }
   }, []);
 
   const createRoom = () => {
-    history.push('room/:create');
+    navigate('room/:create');
   };
 
   const joinRoom = () => {
-    history.push(`room/${roomName}`);
+    navigate(`room/${roomName}`);
   };
+
   return (
-    <div className={classes.loginContainer}>
+    <div className="login-container">
       <CustomButton onClick={createRoom}>Create game</CustomButton>
-      <input
-        type="text"
-        placeholder="Room"
-        value={roomName}
-        onChange={handleRoomNameChange}
-        className={classes.textInput}
-      />
+      <input type="text" placeholder="Room" value={roomName} onChange={handleRoomNameChange} className="text-input" />
       <CustomButton onClick={joinRoom}>Join Game</CustomButton>
     </div>
   );

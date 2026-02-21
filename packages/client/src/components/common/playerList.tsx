@@ -1,44 +1,10 @@
-import React from 'react';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import PersonIcon from '@material-ui/icons/Person';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
 import { Player } from '../../interfaces/api';
-
 import CrownSolid from '../../assets/svg/crown-solid.svg?react';
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    item: {
-      backgroundColor: '#feffed',
-      margin: '5px 0;',
-      minWidth: 250,
-    },
-    itemCzar: {
-      backgroundColor: '#685c77',
-      margin: '5px 0;',
-    },
-    itemHost: {
-      backgroundColor: '#f0c348',
-      margin: '5px 0;',
-    },
-    listItemContainer: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      flexGrow: 1,
-    },
-    nameContainer: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      flexGrow: 0.05,
-      alignItems: 'center',
-    },
-    spacing: {
-      margin: 5,
-    },
-  })
+const PersonIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+  </svg>
 );
 
 export interface PlayerListProps {
@@ -48,33 +14,29 @@ export interface PlayerListProps {
   includeHost?: boolean;
 }
 
-export const PlayerList = ({
-  players,
-  includeGameData = false,
-  includeCzar = false,
-  includeHost = false,
-}: PlayerListProps): JSX.Element => {
-  const classes = useStyles();
+export const PlayerList = ({ players, includeGameData = false, includeCzar = false, includeHost = false }: PlayerListProps) => {
+  const getItemClass = (player: Player): string => {
+    if (player.host && includeHost) return 'player-item player-item--host';
+    if (player.isCzar && includeCzar) return 'player-item player-item--czar';
+    return 'player-item';
+  };
 
   return (
-    <List className={classes.spacing} component="nav">
+    <ul className="player-list">
       {players
         .sort((a, b) => b.score - a.score)
         .map((player, i) => (
-          <ListItem
-            key={i}
-            className={player.host && includeHost ? classes.itemHost : player.isCzar && includeCzar ? classes.itemCzar : classes.item}
-          >
-            <div className={classes.listItemContainer}>
-              <div className={classes.nameContainer}>
+          <li key={i} className={getItemClass(player)}>
+            <div className="player-item__content">
+              <div className="player-item__name">
                 {player.isCzar && includeCzar && <CrownSolid />}
                 {player.host && includeHost && <PersonIcon />}
                 {player.username}
               </div>
               {includeGameData && <p>Score: {player.score}</p>}
             </div>
-          </ListItem>
+          </li>
         ))}
-    </List>
+    </ul>
   );
 };
