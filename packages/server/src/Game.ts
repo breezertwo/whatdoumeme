@@ -1,6 +1,6 @@
 import deepcopy from 'deepcopy';
 import { deck } from './db';
-import { MemeCard, RoundData, WhiteCard, Player, BasePlayer } from './interfaces/game';
+import { MemeCard, RoundData, WhiteCard, Player, BasePlayer, GameSnapshot } from './interfaces/game';
 import * as Utils from './utils';
 
 interface RoundResult {
@@ -18,7 +18,7 @@ export enum STATES {
 }
 
 export default class Game {
-  private readonly _id: string;
+  private _id: string;
   private readonly _host: string;
 
   private MAX_SCORE: number;
@@ -35,9 +35,9 @@ export default class Game {
   private currentPlayedCards: (WhiteCard & { owner: string })[];
   private currentCzar: string;
 
-  constructor(host: string) {
+  constructor(host: string, id?: string) {
     this._STATE = STATES.WAITING;
-    this._id = Utils.generateUniqueId();
+    this._id = id ?? Utils.generateUniqueId();
     this._host = host;
   }
 
@@ -236,6 +236,41 @@ export default class Game {
       strippedPlayers.push({ username, score, tradeOptions, host, isCzar });
     }
     return strippedPlayers;
+  }
+
+  // ── Persistence ─────────────────────────────────────────────────────────────
+
+  public toSnapshot(): GameSnapshot {
+    return {
+      id: this._id,
+      host: this._host,
+      maxScore: this.MAX_SCORE ?? null,
+      state: this._STATE,
+      currentCzar: this.currentCzar ?? null,
+      selectedMeme: this.selectedMeme ?? null,
+      players: this._players,
+      deckMeme: this.deckMeme ?? null,
+      deckCards: this.deckCards ?? null,
+      currentPlayedCards: this.currentPlayedCards ?? null,
+    };
+  }
+
+  /**
+   * Reconstructs a Game from a previously saved snapshot.
+   * socketId values in players will be stale after a server restart —
+   * they are updated when each player reconnects via joinGame().
+   */
+  public static fromSnapshot(snap: GameSnapshot): Game {
+    const game = new Game(snap.host, snap.id);
+    if (snap.maxScore !== null) game.MAX_SCORE = snap.maxScore;
+    game._STATE = snap.state as STATES;
+    game.currentCzar = snap.currentCzar ?? undefined;
+    game.selectedMeme = snap.selectedMeme ?? undefined;
+    game._players = snap.players;
+    game.deckMeme = snap.deckMeme ?? undefined;
+    game.deckCards = snap.deckCards ?? undefined;
+    game.currentPlayedCards = snap.currentPlayedCards ?? [];
+    return game;
   }
 
   public renewPlayerCards(playerName: string): boolean {

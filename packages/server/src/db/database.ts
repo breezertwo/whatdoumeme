@@ -1,5 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
 import { User, RedditMeme } from './dbModels';
+import { GameSnapshot } from '../interfaces/game';
 
 export class AppDatabase {
   private readonly db: DatabaseSync;
@@ -12,14 +13,18 @@ export class AppDatabase {
   private init(): void {
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS users (
-        id   INTEGER PRIMARY KEY AUTOINCREMENT,
+        id       INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL
       );
       CREATE TABLE IF NOT EXISTS reddit_posts (
-        id   INTEGER PRIMARY KEY AUTOINCREMENT,
+        id    INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
-        url  TEXT NOT NULL,
-        sub  TEXT NOT NULL
+        url   TEXT NOT NULL,
+        sub   TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS rooms (
+        id       TEXT PRIMARY KEY,
+        snapshot TEXT NOT NULL
       );
     `);
     console.log('[DB] SQLite database initialised');
@@ -40,6 +45,26 @@ export class AppDatabase {
       .prepare('SELECT url FROM reddit_posts ORDER BY RANDOM() LIMIT 1')
       .get() as unknown as Pick<RedditMeme, 'url'> | undefined;
     return row?.url;
+  }
+
+  // ── Room persistence ─────────────────────────────────────────────────────────
+
+  public saveRoom(snapshot: GameSnapshot): void {
+    this.db.prepare(`
+      INSERT INTO rooms (id, snapshot) VALUES (?, ?)
+      ON CONFLICT(id) DO UPDATE SET snapshot = excluded.snapshot
+    `).run(snapshot.id, JSON.stringify(snapshot));
+  }
+
+  public loadAllRooms(): GameSnapshot[] {
+    const rows = this.db
+      .prepare('SELECT snapshot FROM rooms')
+      .all() as { snapshot: string }[];
+    return rows.map((r) => JSON.parse(r.snapshot) as GameSnapshot);
+  }
+
+  public deleteRoom(roomId: string): void {
+    this.db.prepare('DELETE FROM rooms WHERE id = ?').run(roomId);
   }
 
   public close(): void {

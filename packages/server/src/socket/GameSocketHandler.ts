@@ -71,7 +71,11 @@ export class GameSocketHandler {
 
     this.io.to(game.id).emit(ServerEvent.PLAYER_DATA, game.getFrontendPlayerData());
 
-    if (game.players.length === 0) this.rooms.deleteRoom(game.id);
+    if (game.players.length === 0) {
+      this.rooms.deleteRoom(game.id);
+    } else {
+      this.rooms.saveRoom(game);
+    }
   };
 
   private onStartGame = (data: { maxWinPoints?: number }): void => {
@@ -79,6 +83,7 @@ export class GameSocketHandler {
     if (!game) return;
 
     game.initGame(data.maxWinPoints);
+    this.rooms.saveRoom(game);
     this.io.to(game.id).emit(ServerEvent.PLAYER_DATA, game.getFrontendPlayerData());
     this.emitRoundToAll(game);
   };
@@ -88,6 +93,7 @@ export class GameSocketHandler {
     if (!username || !game) return;
 
     if (game.renewPlayerCards(username)) {
+      this.rooms.saveRoom(game);
       this.socket.emit(ServerEvent.PLAYER_DATA, game.getFrontendPlayerData());
       this.socket.emit(ServerEvent.NEW_ROUND, game.getRound(username));
     }
@@ -98,6 +104,7 @@ export class GameSocketHandler {
     if (!game) return;
 
     game.setSelectedMeme(data.cardId);
+    this.rooms.saveRoom(game);
     this.emitRoundToAll(game);
   };
 
@@ -106,6 +113,7 @@ export class GameSocketHandler {
     if (!username || !game) return;
 
     game.setSelectedPlayerCard(username, data.cardId);
+    this.rooms.saveRoom(game);
 
     if (game.state === STATES.ANSWERS) {
       // Last card committed — server moves to ANSWERS, broadcast to all
@@ -133,6 +141,9 @@ export class GameSocketHandler {
       this.io.to(game.id).emit(ServerEvent.ROUND_END);
     }
 
+    // Save once after all synchronous mutations (setWinningCard + startNewRound).
+    // The setTimeout above only emits — it doesn't change game state.
+    this.rooms.saveRoom(game);
     this.io.to(game.id).emit(ServerEvent.PLAYER_DATA, game.getFrontendPlayerData());
   };
 

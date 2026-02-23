@@ -34,7 +34,7 @@ export class MemeServer {
     this._app.get('/join', (req, res) => this.joinGameLink(req, res));
 
     this.db = new AppDatabase();
-    this.rooms = new GameRoomManager();
+    this.rooms = new GameRoomManager(this.db);
     this.io = new Server(this._server);
 
     this.listen();
@@ -76,6 +76,9 @@ export class MemeServer {
       // Bind identity to the socket — GameSocketHandler reads from socket.data.
       socket.data.username = username;
       socket.data.roomId   = game.id;
+
+      // Persist the updated player list (new join or rejoined socketId).
+      this.rooms.saveRoom(game);
 
       // ── Initial state emission ─────────────────────────────────────────────
       switch (game.state) {

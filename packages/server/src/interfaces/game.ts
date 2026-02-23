@@ -38,3 +38,21 @@ export interface Player extends BasePlayer {
   cards: WhiteCard[];
   winCards: MemeCard[];
 }
+
+/**
+ * Plain JSON-serializable snapshot of a Game instance.
+ * Used to persist rooms to SQLite and restore them on server restart.
+ * Fields that are uninitialized before Game.initGame() are nullable.
+ */
+export interface GameSnapshot {
+  id: string;
+  host: string;
+  maxScore: number | null;
+  state: number;
+  currentCzar: string | null;
+  selectedMeme: MemeCard | null;
+  players: Player[];
+  deckMeme: MemeCard[] | null;
+  deckCards: WhiteCard[] | null;
+  currentPlayedCards: (WhiteCard & { owner: string })[] | null;
+}
