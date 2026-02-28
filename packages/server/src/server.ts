@@ -2,6 +2,7 @@
 
 import { MemeServer } from './MemeServer';
 
-const app = new MemeServer().app;
 
-export { app };
+const m = new MemeServer().app;
+
+export { m };

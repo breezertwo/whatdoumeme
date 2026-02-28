@@ -1,32 +1,24 @@
-import Cookies from 'js-cookie';
-import React, { ChangeEvent, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { ChangeEvent, useState } from 'react';
 import { CustomButton } from '../gamescreen/views/subviews';
-import { useLoginStyles } from './login';
+import { useSetUsername } from '../../context/username';
+import Cookies from 'js-cookie';
 
-const Username = (): JSX.Element => {
-  const [username, setUsername] = useState('');
-  const history = useHistory();
-  const classes = useLoginStyles();
+const Username = () => {
+  const [localUsername, setLocalUsername] = useState('');
+  const setUsername = useSetUsername();
 
-  const handleUserameChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    setUsername(event.target.value);
+  const handleUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setLocalUsername(event.target.value);
   };
 
   const onClick = () => {
-    Cookies.set('userName', username);
-    history.push(`/`);
+    Cookies.set('userName', localUsername);
+    setUsername(localUsername);
   };
 
   return (
-    <div className={classes.loginContainer}>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={handleUserameChange}
-        className={classes.textInput}
-      />
+    <div className="login-container">
+      <input type="text" placeholder="Username" value={localUsername} onChange={handleUsernameChange} className="text-input" />
       <CustomButton onClick={onClick}>Set username</CustomButton>
     </div>
   );

@@ -1,23 +1,5 @@
 import React, { useState } from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import GridList from '@material-ui/core/GridList';
 import TextCard from './Card';
-
-const useStyles = makeStyles<Theme, CardsProps>(() =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      justifyContent: 'space-around',
-      overflow: 'hidden',
-      margin: '5px 0',
-    },
-    gridList: {
-      flexWrap: (props) => (props.isCzar && props.isShowComitted ? 'wrap' : 'nowrap'),
-      justifyContent: (props) => (props.isCzar && props.isShowComitted ? 'center' : ''),
-    },
-  })
-);
 
 interface Card {
   text?: string;
@@ -32,24 +14,20 @@ export interface CardsProps {
   onCardClicked?: (id: string) => void;
 }
 
-const Cards = ({
-  playerCards,
-  isCzar = false,
-  isShowComitted = false,
-  onCardClicked,
-}: CardsProps): JSX.Element => {
+const Cards = ({ playerCards, isCzar = false, isShowComitted = false, onCardClicked }: CardsProps) => {
   const [isHl, setIsHl] = useState<string>(null);
-  const classes = useStyles({ playerCards, isCzar, isShowComitted, onCardClicked });
 
   const onCardClickedInner = (id: string) => {
     setIsHl(id);
     onCardClicked(id);
   };
 
+  const gridClass = `cards-grid${isCzar && isShowComitted ? ' cards-grid--wrap' : ''}`;
+
   return (
-    <div className={classes.root}>
+    <div className="cards-root">
       {playerCards ? (
-        <GridList className={classes.gridList} cols={5}>
+        <div className={gridClass}>
           {playerCards.map((card, i) => (
             <TextCard
               onCardClicked={onCardClickedInner}
@@ -61,7 +39,7 @@ const Cards = ({
               isHighlighted={card.cardId === isHl}
             />
           ))}
-        </GridList>
+        </div>
       ) : null}
     </div>
   );

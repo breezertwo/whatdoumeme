@@ -1,29 +1,3 @@
-import React from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import Typography from '@material-ui/core/Typography';
-
-const useStyles = makeStyles<Theme, CardProps>(() =>
-  createStyles({
-    card: {
-      borderRadius: 25,
-      minHeight: (props) => (props.isCzar && !props.isShowComitted ? 500 : 250),
-      minWidth: (props) => (props.isCzar && !props.isShowComitted ? 300 : 150),
-      height: (props) => (props.isCzar && !props.isShowComitted ? 500 : 250),
-      width: (props) => (props.isCzar && !props.isShowComitted ? 300 : 150),
-      margin: 5,
-      textAlign: 'center',
-      backgroundColor: (props) => (props.isHighlighted ? '#89e8a0' : 'white'),
-    },
-    imgTag: {
-      maxWidth: '100%',
-      maxHeight: '100%',
-      verticalAlign: 'middle',
-    },
-  })
-);
-
 export interface CardProps {
   text: string;
   cardId: string;
@@ -33,22 +7,17 @@ export interface CardProps {
   onCardClicked: (cardId: string) => void;
 }
 
-const TextCard = (props: CardProps): JSX.Element => {
-  const { text, isCzar, cardId, onCardClicked } = props;
-  const classes = useStyles(props);
+const TextCard = (props: CardProps) => {
+  const { text, isCzar, isShowComitted, cardId, onCardClicked, isHighlighted } = props;
+
+  const cardClass = ['text-card', isCzar && !isShowComitted ? 'text-card--czar' : '', isHighlighted ? 'text-card--highlighted' : '']
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <Card className={classes.card} variant="outlined" onClick={() => onCardClicked(cardId)}>
-      <CardContent>
-        {isCzar ? (
-          <img className={classes.imgTag} src={`assets/memes/${text}`} alt="It's a meme" />
-        ) : (
-          <Typography variant="body2" component="p">
-            {text}
-          </Typography>
-        )}
-      </CardContent>
-    </Card>
+    <div className={cardClass} onClick={() => onCardClicked(cardId)}>
+      {isCzar ? <img className="text-card__img" src={`assets/memes/${text}`} alt="It's a meme" /> : <p>{text}</p>}
+    </div>
   );
 };
 

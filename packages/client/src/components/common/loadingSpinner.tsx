@@ -1,33 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core';
-import { useMainContianerStyles } from '../gamescreen/views/styles';
 
 interface LoadingProps {
   msg?: string;
   requestMemeUrl?: () => Promise<string>;
 }
 
-const useStyles = makeStyles({
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    flexGrow: 1,
-    '& > *': {
-      margin: 10,
-    },
-  },
-  memeContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-});
-
-const LoadingSpinner = ({ msg, requestMemeUrl }: LoadingProps): JSX.Element => {
+const LoadingSpinner = ({ msg, requestMemeUrl }: LoadingProps) => {
   const [memeURL, setMemeURL] = useState<string>(undefined);
-  const classes = useStyles();
-  const classesMain = useMainContianerStyles();
 
   useEffect(() => {
     setTimeout(async () => {
@@ -41,14 +20,14 @@ const LoadingSpinner = ({ msg, requestMemeUrl }: LoadingProps): JSX.Element => {
   }, []);
 
   return (
-    <div className={classesMain.mainContainer}>
-      <div className={classes.loadingContainer}>
+    <div className="main-container">
+      <div className="loading-container">
         <h1>{msg}</h1>
         <div className="loader"></div>
         {memeURL && (
-          <div className={classes.memeContainer}>
-            <p> Random reddit meme: </p>
-            <img style={{ width: '100%' }} src={memeURL}></img>
+          <div className="meme-container">
+            <p>Random reddit meme:</p>
+            <img style={{ width: '100%' }} src={memeURL} alt="Random meme" />
           </div>
         )}
       </div>

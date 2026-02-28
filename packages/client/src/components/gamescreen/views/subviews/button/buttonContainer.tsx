@@ -1,48 +1,20 @@
-import React from 'react';
-import { Button } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core';
-
-const useStyles = makeStyles({
-  root: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  button: {
-    margin: 5,
-    flexGrow: 1,
-  },
-});
+import { Button } from '@base-ui/react/button';
 
 export interface ButtonContainerProps {
   onConfirmClicked?: () => void;
   onLeaveClick?: () => void;
 }
 
-export const ButtonContainer = ({
-  onConfirmClicked,
-  onLeaveClick,
-}: ButtonContainerProps): JSX.Element => {
-  const classes = useStyles();
-
+export const ButtonContainer = ({ onConfirmClicked, onLeaveClick }: ButtonContainerProps) => {
   return (
-    <div className={classes.root}>
+    <div className="btn-row">
       {onConfirmClicked && (
-        <Button
-          variant="contained"
-          className={classes.button}
-          color="primary"
-          onClick={onConfirmClicked}>
+        <Button className="btn btn-primary" onClick={onConfirmClicked}>
           Confirm
         </Button>
       )}
       {onLeaveClick && (
-        <Button
-          variant="contained"
-          className={classes.button}
-          color="secondary"
-          onClick={onLeaveClick}>
+        <Button className="btn btn-secondary" onClick={onLeaveClick}>
           Leave
         </Button>
       )}

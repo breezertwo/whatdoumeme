@@ -1,10 +1,14 @@
+@use './loader';
 @import url('https://fonts.googleapis.com/css?family=Dosis:400,700');
-@import './loader.scss';
 
 :root {
   --main-white-color: #f2f2f2;
   --main-black-color: black;
   --main-purple-color: #a28dbc;
+  --color-primary: #31a24c;
+  --color-primary-hover: #1f7d36;
+  --color-secondary: #d12013;
+  --color-secondary-hover: #a50e0e;
 }
 
 * {
@@ -97,6 +101,391 @@ h1 {
   margin-right: 20px;
 }
 
+/* MAIN CONTAINER
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.main-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  max-width: 600px;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.basic-flex {
+  display: flex;
+  flex-grow: 1;
+}
+
+/* BUTTONS
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Dosis', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: white;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+
+  &:hover {
+    background: var(--color-primary-hover);
+  }
+}
+
+.btn-secondary {
+  background: var(--color-secondary);
+
+  &:hover {
+    background: var(--color-secondary-hover);
+  }
+}
+
+.btn-full {
+  flex-grow: 1;
+  width: 100%;
+  padding: 20px 12px;
+  margin: 10px 0;
+}
+
+.btn-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  > .btn {
+    margin: 5px;
+    flex-grow: 1;
+  }
+}
+
+/* LOGIN
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  max-width: 500px;
+}
+
+.text-input {
+  padding: 18px 12px;
+  border-radius: 7px;
+  font-size: 24px;
+  margin: 30px 0 10px 0;
+  font-family: 'Dosis', sans-serif;
+  border: 1px solid #ccc;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.number-input {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: 'Dosis', sans-serif;
+  border: 1px solid #ccc;
+  width: 80px;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+/* TABS
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.tab-list {
+  display: flex;
+  flex-direction: row;
+  background: var(--color-primary);
+  width: 100%;
+}
+
+.tab {
+  flex: 1;
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Dosis', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+
+  &[data-active] {
+    color: white;
+    border-bottom-color: white;
+  }
+
+  &:hover:not([data-active]) {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.tab-panel {
+  display: flex;
+  flex-grow: 1;
+}
+
+/* PLAYER LIST
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.player-list {
+  margin: 5px;
+  min-width: 250px;
+}
+
+.player-item {
+  background-color: #feffed;
+  margin: 5px 0;
+  padding: 8px 16px;
+  display: flex;
+
+  &--czar {
+    background-color: #685c77;
+  }
+
+  &--host {
+    background-color: #f0c348;
+  }
+}
+
+.player-item__content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.player-item__name {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex-grow: 0.05;
+}
+
+/* LOADING
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  flex-grow: 1;
+
+  > * {
+    margin: 10px;
+  }
+}
+
+.meme-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* CARDS
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.cards-root {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  overflow: hidden;
+  margin: 5px 0;
+}
+
+.cards-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+
+  &--wrap {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+.text-card {
+  border-radius: 25px;
+  height: 250px;
+  width: 150px;
+  min-height: 250px;
+  min-width: 150px;
+  margin: 5px;
+  text-align: center;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+
+  &--czar {
+    height: 500px;
+    width: 300px;
+    min-height: 500px;
+    min-width: 300px;
+  }
+
+  &--highlighted {
+    background-color: #89e8a0;
+  }
+}
+
+.text-card__img {
+  max-width: 100%;
+  max-height: 100%;
+  vertical-align: middle;
+}
+
+/* LOBBY
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.lobby {
+  width: 100%;
+  max-width: 360px;
+}
+
+.lobby-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lobby-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.lobby-spacing {
+  margin: 5px;
+}
+
+/* SHARE DIALOG
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.share-link-icon {
+  cursor: pointer;
+  display: inline-flex;
+  transform: scale(1.5);
+  transition: transform 0.15s ease;
+  border: 0;
+
+  &:hover {
+    transform: scale(1.75);
+  }
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.dialog-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  z-index: 1001;
+  min-width: 320px;
+  font-family: 'Dosis', sans-serif;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dialog-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5em;
+  line-height: 1;
+  color: #666;
+
+  &:hover {
+    color: #000;
+  }
+}
+
+.dialog-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+}
+
+.share-input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: 'Dosis', sans-serif;
+  font-size: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.share-copy-btn {
+  color: #323333;
+  border: 2px solid #323333;
+  font-weight: bold;
+  background: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Dosis', sans-serif;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: #5c99ed;
+    border-color: #5c99ed;
+    color: white;
+  }
+}
+
+/* IMG View
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.imgView {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 75%;
+  align-self: center;
+}
+
+.imgView > img {
+  max-height: 300px;
+}
+
+svg {
+  width: 1em;
+  height: 1em;
+}
+
 /* MQ
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 @media screen and (min-width: 550px) {
@@ -134,27 +523,4 @@ h1 {
   .page-main {
     align-items: normal;
   }
-}
-/* IMG View
-–––––––––––––––––––––––––––––––––––––––––––––––––– */
-
-.imgView {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  max-width: 75%;
-  align-self: center;
-}
-
-.imgView > img {
-  max-height: 300px;
-}
-
-.MuiCardContent-root > img {
-  width: 100%;
-}
-
-svg {
-  width: 1em;
-  height: 1em;
 }

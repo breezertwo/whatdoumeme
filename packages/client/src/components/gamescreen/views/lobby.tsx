@@ -1,36 +1,9 @@
 import React, { ChangeEvent, useState } from 'react';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+import { Button } from '@base-ui/react/button';
 import Cookies from 'js-cookie';
-import { Button, TextField } from '@material-ui/core';
 import { PlayerList } from '../../common';
 import { useIsHost } from '../../../hooks/useIsHost';
 import { Player } from '../../../interfaces/api';
-
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      width: '100%',
-      maxWidth: 360,
-    },
-    header: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    divContainerEnd: {
-      display: 'flex',
-      justifyContent: 'space-between',
-    },
-    button: {
-      margin: 5,
-      flexGrow: 1,
-    },
-    spacing: {
-      margin: 5,
-    },
-  })
-);
 
 export interface LobbyProps {
   players: Player[];
@@ -38,51 +11,35 @@ export interface LobbyProps {
   onStartClick: (maxWinPoints?: number) => void;
 }
 
-export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps): JSX.Element => {
+export const Lobby = ({ players, onStartClick, onLeaveClick }: LobbyProps) => {
   const [maxPoints, setMaxPoints] = useState(4);
-  const classes = useStyles();
   const isHost = useIsHost(players);
 
-  const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMaxPoints(parseInt(event.target.value));
   };
 
   return (
-    <div className={classes.root}>
-      <div className={classes.header}>
-        <div className={classes.spacing}>
+    <div className="lobby">
+      <div className="lobby-header">
+        <div className="lobby-spacing">
           <h2>Lobby: {Cookies.get('roomId')}</h2>
         </div>
-        <div className={classes.divContainerEnd}>
+        <div className="lobby-actions">
           {isHost && (
-            <Button
-              variant="contained"
-              className={classes.button}
-              color="primary"
-              onClick={() => onStartClick(maxPoints)}>
+            <Button className="btn btn-primary" onClick={() => onStartClick(maxPoints)}>
               Start
             </Button>
           )}
-          <Button
-            variant="contained"
-            className={classes.button}
-            color="secondary"
-            onClick={onLeaveClick}>
+          <Button className="btn btn-secondary" onClick={onLeaveClick}>
             Leave
           </Button>
         </div>
       </div>
       {isHost && (
-        <div className={`${classes.header} ${classes.spacing}`}>
-          <p>Points to win: </p>
-          <TextField
-            label="Points"
-            id="ptw"
-            defaultValue="4"
-            variant="outlined"
-            size="small"
-            onChange={handleInputChange}
-          />
+        <div className="lobby-header lobby-spacing">
+          <p>Points to win:</p>
+          <input type="number" className="number-input" defaultValue={4} min={1} onChange={handleInputChange} aria-label="Points to win" />
         </div>
       )}
       <PlayerList players={players} includeHost={true} />

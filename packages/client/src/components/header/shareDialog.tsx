@@ -1,148 +1,62 @@
-import React from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Slide from '@material-ui/core/Slide';
-import { TransitionProps } from '@material-ui/core/transitions';
-import LinkIcon from '@material-ui/icons/Link';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-
+import { useRef, useState } from 'react';
+import { Dialog } from '@base-ui/react/dialog';
 import Cookies from 'js-cookie';
-import { makeStyles, TextField } from '@material-ui/core';
-import { useEffect } from 'react';
 
-const useStyles = makeStyles({
-  dialogBody: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: '10px',
-    gap: '1em',
-    '& .MuiInputBase-input': {
-      height: '0.1876em',
-    },
-  },
-  dialogHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  linkIcon: {
-    transform: 'rotate(-45deg)',
-    '&:hover': {
-      transform: 'rotate(-55deg) scale(1.20)',
-    },
-  },
-  closeIcon: {
-    transform: 'scale(1.5)',
-    '&:hover': {
-      transform: 'scale(1.6)',
-    },
-  },
-  customButtonColor: {
-    color: '#323333',
-    border: '2px solid #323333',
-    fontWeight: 'bold',
-    '&:hover': {
-      backgroundColor: '#5c99ed',
-      border: '2px solid #5c99ed',
-    },
-  },
-  font: {
-    '& *': {
-      fontFamily: 'Dosis, sans-serif !important',
-    },
-  },
-});
+import { SOCKET_SERVER_URL } from '../../socket/SocketProvider';
 
-const Transition = React.forwardRef(function Transition(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  props: TransitionProps & { children?: React.ReactElement<any, any> },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="down" ref={ref} {...props} />;
-});
+const LinkIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
+  </svg>
+);
 
-export const ShareDialog = (): JSX.Element => {
-  const [open, setOpen] = React.useState(false);
-  const classes = useStyles();
+function getShareURL(): string {
+  return `${SOCKET_SERVER_URL}/join?id=${Cookies.get('roomId')}`;
+}
 
-  let linkValue = getShareURL();
-  let textValue: HTMLInputElement;
-
-  useEffect(() => {
-    linkValue = getShareURL();
-  }, [open]);
-
-  const copyCodeToClipboard = () => {
-    textValue.select();
-    document.execCommand('copy');
-  };
-
-  const handleCopy = () => {
-    copyCodeToClipboard();
-    setOpen(false);
-  };
+export const ShareDialog = () => {
+  const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClickOpen = () => {
     if (Cookies.get('roomId')) {
       setOpen(true);
     } else {
-      setOpen(false);
+      alert('Create or join a room first!');
     }
   };
 
-  const handleClose = () => {
+  const handleCopy = () => {
+    if (inputRef.current) {
+      navigator.clipboard.writeText(inputRef.current.value);
+    }
     setOpen(false);
   };
 
   return (
     <div>
-      <LinkIcon onClick={handleClickOpen} className={classes.linkIcon} />
-      <Dialog
-        className={classes.font}
-        open={open}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-slide-title"
-        aria-describedby="alert-dialog-slide-description">
-        <DialogTitle id="alert-dialog-slide-title">
-          <div className={classes.dialogHeader}>
-            <h3>Invite your friend!</h3>
-            <HighlightOffIcon onClick={handleClose} className={classes.closeIcon} />
-          </div>
-        </DialogTitle>
-        <DialogContent>
-          <div className={classes.dialogBody}>
-            <TextField
-              id="filled-read-only-input"
-              label="Link"
-              value={linkValue}
-              InputProps={{
-                readOnly: true,
-              }}
-              variant="outlined"
-              inputRef={(ref) => {
-                textValue = ref;
-              }}
-            />
-            <Button
-              className={classes.customButtonColor}
-              onClick={handleCopy}
-              variant="outlined"
-              color="primary">
-              Copy
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <button className="share-link-icon" onClick={handleClickOpen} aria-label="Share invitation link">
+        <LinkIcon />
+      </button>
+      <Dialog.Root open={open} onOpenChange={setOpen}>
+        <Dialog.Portal>
+          <Dialog.Backdrop className="dialog-backdrop" />
+          <Dialog.Popup className="dialog-popup">
+            <div className="dialog-header">
+              <Dialog.Title render={<h3 />}>Invite your friend!</Dialog.Title>
+              <Dialog.Close className="dialog-close" aria-label="Close">
+                &times;
+              </Dialog.Close>
+            </div>
+            <div className="dialog-body">
+              <input ref={inputRef} className="share-input" value={getShareURL()} readOnly aria-label="Invitation link" />
+              <button className="share-copy-btn" onClick={handleCopy}>
+                Copy
+              </button>
+            </div>
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 };
-
-function getShareURL(): string {
-  return `${window.location.href}join?id=${Cookies.get('roomId')}`;
-}

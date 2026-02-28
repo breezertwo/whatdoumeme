@@ -1,10 +1,10 @@
 export interface User {
-  _id: string;
+  id: number;
   username: string;
 }
 
 export interface RedditMeme {
-  _id: string;
+  id: number;
   title: string;
   url: string;
   sub: string;

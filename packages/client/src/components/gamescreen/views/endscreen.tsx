@@ -1,5 +1,4 @@
-import React from 'react';
-import { Button, makeStyles } from '@material-ui/core';
+import { Button } from '@base-ui/react/button';
 import { useIsHost } from '../../../hooks/useIsHost';
 import { PlayerList } from '../../common';
 import { Player } from '../../../interfaces/api';
@@ -10,36 +9,20 @@ export interface EndScreenProps {
   onLeave: () => void;
 }
 
-const useStyles = makeStyles({
-  divContainerEnd: {
-    display: 'flex',
-    justifyContent: 'space-between',
-  },
-  button: {
-    margin: 5,
-    flexGrow: 1,
-  },
-});
-
-export const EndScreenView = ({ playerData, onRestart, onLeave }: EndScreenProps): JSX.Element => {
-  const classes = useStyles();
+export const EndScreenView = ({ playerData, onRestart, onLeave }: EndScreenProps) => {
   const isHost = useIsHost(playerData);
 
   return (
     <>
       <h1>Game ended!</h1>
       <PlayerList players={playerData} includeGameData={true} />
-      <div className={classes.divContainerEnd}>
+      <div className="btn-row">
         {isHost && (
-          <Button
-            variant="contained"
-            className={classes.button}
-            color="primary"
-            onClick={() => onRestart()}>
+          <Button className="btn btn-primary" onClick={onRestart}>
             Start new round
           </Button>
         )}
-        <Button variant="contained" className={classes.button} color="secondary" onClick={onLeave}>
+        <Button className="btn btn-secondary" onClick={onLeave}>
           Leave
         </Button>
       </div>

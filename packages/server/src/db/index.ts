@@ -1,3 +1,3 @@
 export * from './dbModels';
-export * from './mongoDb';
+export * from './database';
 export * from './gameData';

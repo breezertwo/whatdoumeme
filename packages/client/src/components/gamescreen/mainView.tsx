@@ -1,56 +1,54 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import useConnection from '../../hooks/useConnection';
+import { useState } from 'react';
+import { Tabs } from '@base-ui/react/tabs';
+
+import { useGameState } from '../../socket/useGameState';
+import { useGameActions } from '../../socket/useGameActions';
+import { STATES } from '../../interfaces/api';
+
 import LoadingSpinner from '../common/loadingSpinner';
 import { CzarView, GameView, Lobby, WinnerView, EndScreenView } from './views';
-import { TabBar, TabPanel } from './views/subviews';
-import { STATES } from '../../interfaces/api';
+import { TabBar } from './views/subviews';
 import { ScoreBoard } from '../scoreboard/scoreBoard';
 import { ActionsView } from '../actionmenue/actionmenue';
 
-interface ParamTypes {
-  roomId: string;
-}
+// ── GameScreen ───────────────────────────────────────────────────────────────
+// Consumes the socket context provided by the parent Home component.
 
-const Home = (): JSX.Element => {
+export const GameScreen = () => {
   const [selectedCardId, setSelectedCard] = useState<string>(null);
-  const [activeTabId, setActiveTab] = useState(0);
-  const { roomId } = useParams<ParamTypes>();
 
-  const {
-    roundData,
-    playersData,
-    serverState,
-    startGame,
-    leaveGame,
-    confirmCard,
-    confirmMeme,
-    tradeInWin,
-    requestMemeUrl,
-  } = useConnection(roomId);
+  const { serverState, roundData, players, markCommitted } = useGameState();
+  const actions = useGameActions();
 
-  const onCardClicked = (id: string): void => {
-    setSelectedCard(id);
-  };
-
-  const handleTabChange = (tabId: number): void => {
-    setActiveTab(tabId);
-  };
+  const onCardClicked = (id: string): void => setSelectedCard(id);
 
   const handleConfirmCard = (): void => {
-    confirmCard(selectedCardId);
+    if (!selectedCardId) return;
+    if (serverState === STATES.ANSWERS) {
+      // Czar selects the winning card
+      actions.submitWinnerCard(selectedCardId);
+    } else {
+      // Player submits their card — fire and forget, markCommitted immediately
+      // so the UI switches to the waiting spinner. The next newRound event from
+      // the server will override this state with the real ANSWERS/MEMELORD value.
+      markCommitted();
+      actions.submitCard(selectedCardId);
+    }
     setSelectedCard(null);
   };
 
   const handleConfirmMeme = (): void => {
-    confirmMeme(selectedCardId);
-    setSelectedCard(null);
+    if (selectedCardId) {
+      actions.confirmMeme(selectedCardId);
+      setSelectedCard(null);
+    }
   };
 
-  const getViewByState = (): JSX.Element => {
+  const getViewByState = () => {
     switch (serverState) {
       case STATES.WAITING:
-        return <Lobby players={playersData} onStartClick={startGame} onLeaveClick={leaveGame} />;
+        return <Lobby players={players} onStartClick={actions.startGame} onLeaveClick={actions.leaveGame} />;
+
       case STATES.STARTED:
       case STATES.ANSWERS:
         return (
@@ -58,61 +56,53 @@ const Home = (): JSX.Element => {
             roundData={roundData}
             onConfirmClicked={handleConfirmCard}
             onCardClicked={onCardClicked}
-            onLeaveClick={leaveGame}
-            requestMemeUrl={requestMemeUrl}
+            onLeaveClick={actions.leaveGame}
+            requestMemeUrl={actions.requestMeme}
           />
         );
+
       case STATES.MEMELORD:
         return (
           <CzarView
             roundData={roundData}
             onConfirmClicked={handleConfirmMeme}
             onCardClicked={onCardClicked}
-            onLeaveClick={leaveGame}
-            requestMemeUrl={requestMemeUrl}
+            onLeaveClick={actions.leaveGame}
+            requestMemeUrl={actions.requestMeme}
           />
         );
+
       case STATES.WINNER:
         return <WinnerView roundData={roundData} />;
+
       case STATES.COMITTED:
-        return (
-          <LoadingSpinner
-            requestMemeUrl={requestMemeUrl}
-            msg={'Committed. Waiting for the others...'}
-          />
-        );
+        return <LoadingSpinner requestMemeUrl={actions.requestMeme} msg="Committed. Waiting for the others..." />;
+
       case STATES.END:
-        return <EndScreenView playerData={playersData} onRestart={startGame} onLeave={leaveGame} />;
+        return <EndScreenView playerData={players} onRestart={actions.startGame} onLeave={actions.leaveGame} />;
+
       case STATES.LOADING:
-        return <LoadingSpinner requestMemeUrl={requestMemeUrl} msg={'Game is loading...'} />;
+        return <LoadingSpinner requestMemeUrl={actions.requestMeme} msg="Game is loading..." />;
+
       default:
         return <p>FAIL</p>;
     }
   };
 
   return serverState !== STATES.END ? (
-    // This can be improved ... but I currently don't care
-    <>
-      <TabBar serverState={serverState} handleChange={handleTabChange} />
-      {activeTabId === 0 ? (
-        <TabPanel active={activeTabId} index={0}>
-          {getViewByState()}
-        </TabPanel>
-      ) : null}
-      {activeTabId === 1 ? (
-        <TabPanel active={activeTabId} index={1}>
-          <ScoreBoard playerData={playersData} />
-        </TabPanel>
-      ) : null}
-      {activeTabId === 2 ? (
-        <TabPanel active={activeTabId} index={2}>
-          <ActionsView playerData={playersData} onTradeIn={tradeInWin} onLeaveGame={leaveGame} />
-        </TabPanel>
-      ) : null}
-    </>
+    <Tabs.Root defaultValue={0}>
+      <TabBar serverState={serverState} />
+      <Tabs.Panel value={0} className="tab-panel">
+        {getViewByState()}
+      </Tabs.Panel>
+      <Tabs.Panel value={1} className="tab-panel">
+        <ScoreBoard playerData={players} />
+      </Tabs.Panel>
+      <Tabs.Panel value={2} className="tab-panel">
+        <ActionsView playerData={players} onTradeIn={actions.tradeInCard} onLeaveGame={actions.leaveGame} />
+      </Tabs.Panel>
+    </Tabs.Root>
   ) : (
     getViewByState()
   );
 };
-
-export default Home;

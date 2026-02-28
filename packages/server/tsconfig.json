@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es6",
+    "module": "CommonJS",
+    "target": "esnext",
     "noImplicitAny": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
